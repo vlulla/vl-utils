@@ -1,6 +1,6 @@
 #!/usr/bin/env -S sed -E -f
 ## Call this script like
-## sed -E -f fix-bq-query.sed tst.sql
+## sed -E -f format-bq-query.sed tst.sql
 
 ## Need this sed script to remove all the extraneous stuff from the sql query so that BQ can cache the query!
 ##
@@ -9,10 +9,10 @@
 ## the sql script so that we can benefit, hopefully (don't know how to check this though), from BQ!
 ##
 ##
-## 2023.04.04: 
-## bash $ sed -E -f fix-bq-query.sed tst.sql | pbcopy
-## bash $ sed -E -f fix-bq-query.sed tst.sql | vim - 
-## 
+## 2023.04.04:
+## bash $ sed -E -f format-bq-query.sed tst.sql | pbcopy
+## bash $ sed -E -f format-bq-query.sed tst.sql | vim -
+##
 ## Now you can paste the output into the BQ console window
 
 
