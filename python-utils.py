@@ -25,8 +25,10 @@ def fix_colnames(colname: str) -> str:
   return fixed_colname
 
 
+## @hy.settings(max_examples=500) # more thorough but slower
 @hy.given(st.text(min_size=1))
 def test_colname_fixer(s: str):
+  ## TODO: update this with asserts capturing failures that I'm bound to run into
   s1 = fix_colnames(s)
   msg = f"{s} ==> {s1}"
 
