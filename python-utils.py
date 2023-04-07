@@ -1,4 +1,4 @@
-import re,hypothesis as hy, hypothesis.strategies as st
+import re,hypothesis as hy, hypothesis.strategies as st, typing, inspect
 
 def fix_colnames(colname: str, normalize_adjacent_uppers: bool = True) -> str:
   """
@@ -50,3 +50,89 @@ def test_colname_fixer(s: str):
   assert '__' not in s1, f"Rule 3 failed! {msg}"
   assert '.' not in s1, f"Rule 2 failed! {msg}"
   assert re.match('_[^_]_[^_]', s1) is None, f"Some special cols...{s} ==> {s1}"
+
+# Some stats related funcs
+def isiterable(x): return isinstance(x, (list, set, tuple, str))
+def isnumeric(x): return isinstance(x, (int, float, complex)) ## TODO (vijay): might need to include decimal.Decimal
+def avg(xs: typing.Iterable) -> float:
+  assert isiterable(xs), "Not an iterable"
+  assert all(isnumeric(x) for x in xs), "Non numeric value found"
+  return sum(xs)/len(xs)
+mean = average = avg
+def nrange(xs: typing.Iterable) -> typing.Tuple: # mnemonic: numeric range?
+  assert isiterable(xs)
+  assert all(isnumeric(x) for x in xs), "Non numeric value found"
+  return min(xs),max(xs)
+def cumsum(xs: typing.Iterable) -> typing.Iterable:
+  assert isiterable(xs)
+  assert all(isnumeric(x) for x in xs), "Non numeric value found"
+  s=[sum(xs[:i+1]) for i in range(len(xs))]
+  assert sum(xs) == s[-1]
+  return type(xs)(s)
+def freq(xs: typing.Iterable) -> collections.Counter:
+  """
+  >>> freq('mississippi') # similar to pandas.value_counts
+  >>> freq(repeat((1,2,3),2))
+  >>> freq([(1,),(1,)])
+  >>> freq([[1],[1]]) ## TypeError! Values have to be hashable!
+  >>> freq(repeat([1,2,3],2)) # TypeError! Values have to be hashable!
+  """
+  assert isiterable(xs), "Not an iterable"
+  return collections.Counter(xs)
+
+# Some text related funcs
+def squote(x): return f"'{x}'"
+def dquote(x): return f'"{x}"'
+singlequote,doublequote=squote,dquote
+def abbrev(xs: typing.Iterable, n: int = 3) -> typing.Iterable:
+  """
+  >>> abbrev('vijay',3) # 'vij'
+  >>> abbrev([[1,2,3,4],[1,2,3],'vijay',(1,2,3,4)],3) # [[1,2,3],[1,2,3],'vij',(1,2,3)]
+  >>> abbrev([1,2,3,4,5,6,7],3) # AssertionError!
+  >>> abbrev(4,3) # AssertionError!
+  """
+  assert isiterable(xs), "Not an iterable"
+  assert type(n) == int and n > 0
+  if type(xs) == str: return xs[:n]
+  assert all(isiterable(x) for x in xs), "Not all items are iterable...so cannot take abbrev!"
+  return type(xs)([x[:n] for x in xs])
+
+# Useful in pandas/dask and xarray indexing
+ALL = slice(None,None,None)
+# Below only work for loc/iloc indexers!
+def every_nth(n: int):
+  assert isinstance(n, int) and n > 0
+  return slice(None,None,n)
+
+def repeat(x, n: int = 1) -> typing.List:
+  """
+  >>> repeat([1,2,3],2) # [[1,2,3],[1,2,3]]
+  >>> repeat(4,2) # [4,4]
+  >>> ''.join(repeat('abc',4)) == 'abc'*4 # True
+  """
+  assert type(n) == int and n > 0
+  return [x for _ in range(n)]
+
+def genrandstr(n: int = 5) -> str:
+  " >>> [genrandstr(random.randint(2,8)) for _ in range(random.randint(5,10))] "
+
+  assert type(n) == int
+  if n == 0: return '' # There can be only one kind of a string with len 0!
+
+  assert n > 0, f'invalid arg {n}'
+
+  chars=[chr(ord('A')+i) for i in range(26)] + [chr(ord('a')+i) for i in range(26)] # + [chr(ord('0')+i) for i in range(10)]
+  idx = [random.randint(0,len(chars)) for _ in range(n)]
+  return ''.join(chars[i%len(chars)] for i in idx)
+
+def print_source(obj) -> None:
+  """ interesting function to find out how stuff is defined in python. check out print_source(print_source) ! """
+  import inspect
+  try:
+      src = inspect.getsource(obj)
+  except TypeError:
+      src = f"src {str(obj)} of built-in module, class, or function unavailable"
+  print(src)
+
+get_source = get_src = print_src = print_source ## some aliases
+
