@@ -17,6 +17,7 @@
 
 
 /^[[:space:]]*--/d
+/^assert /d
 
 s/[[:space:]]--.*$//g
 s/[[:space:]]+/ /g
