@@ -1,4 +1,5 @@
-import re,hypothesis as hy, hypothesis.strategies as st, typing, inspect, collections
+import re,hypothesis as hy, hypothesis.strategies as st, typing, inspect, collections, random
+import numpy as np
 
 def fix_colnames(colname: str, normalize_adjacent_uppers: bool = True) -> str:
   """
@@ -52,7 +53,7 @@ def test_colname_fixer(s: str):
   assert re.match('_[^_]_[^_]', s1) is None, f"Some special cols...{s} ==> {s1}"
 
 # Some stats related funcs
-def isiterable(x): return isinstance(x, (list, set, tuple, str))
+def isiterable(x): return isinstance(x, (list, set, tuple, str, np.ndarray))
 def isnumeric(x): return isinstance(x, (int, float, complex)) ## TODO (vijay): might need to include decimal.Decimal
 def avg(xs: typing.Iterable) -> float:
   assert isiterable(xs), "Not an iterable"
@@ -68,7 +69,7 @@ def cumsum(xs: typing.Iterable) -> typing.Iterable:
   assert all(isnumeric(x) for x in xs), "Non numeric value found"
   s=[sum(xs[:i+1]) for i in range(len(xs))]
   assert sum(xs) == s[-1]
-  return type(xs)(s)
+  return type(xs)(s) ## does not work with np.ndarrays! Use cumsum(list(ndarr)) instead
 def freq(xs: typing.Iterable) -> collections.Counter:
   """
   >>> freq('mississippi') # similar to pandas.value_counts
