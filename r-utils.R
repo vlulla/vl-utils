@@ -59,7 +59,7 @@ rad2deg <- function(r) r * 180 / pi
 # https://stackoverflow.com/a/26757297
 cart2pol <- function(x,y) {
   rho <- sqrt(x^2+y^2)
-  phi <- atan2(x,y)
+  phi <- atan2(y,x)
   list(rho=rho,phi=phi)
 }
 pol2cart <- function(rho,phi) {
