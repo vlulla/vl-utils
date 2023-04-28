@@ -1,4 +1,4 @@
-import re,hypothesis as hy, hypothesis.strategies as st, typing, inspect
+import re,hypothesis as hy, hypothesis.strategies as st, typing, inspect, collections
 
 def fix_colnames(colname: str, normalize_adjacent_uppers: bool = True) -> str:
   """
@@ -134,5 +134,7 @@ def print_source(obj) -> None:
       src = f"src {str(obj)} of built-in module, class, or function unavailable"
   print(src)
 
-get_source = get_src = print_src = print_source ## some aliases
 
+## some aliases ... especially useful in repl
+get_source = get_src = print_src = print_source
+q=quit
