@@ -58,12 +58,12 @@ deg2rad <- function(d) d * pi / 180
 rad2deg <- function(r) r * 180 / pi
 # https://stackoverflow.com/a/26757297
 cart2pol <- function(x,y) {
-  rho <- sqrt(x^2+y^2)
-  phi <- atan2(y,x)
-  list(rho=rho,phi=phi)
+  ρ <- sqrt(x^2+y^2)
+  θ <- atan2(y,x)
+  list(rho=ρ,phi=θ) ## symbols are hard to type in R console!
 }
-pol2cart <- function(rho,phi) {
-  list(x=rho*cos(phi), y=rho*sin(phi))
+pol2cart <- function(ρ,θ) {
+  list(x=ρ*cos(θ), y=ρ*sin(θ))
 }
 
 cov.pop <- function(x, y=NULL, ...) { cov(x, y, ...) * (NROW(x)-1)/NROW(x) }
