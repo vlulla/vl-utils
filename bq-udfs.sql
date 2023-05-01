@@ -7,8 +7,9 @@
 create or replace function round2(x any type) as ( round(x, 2) );
 create or replace function round3(x any type) as ( round(x, 3) );
 
-create or replace function iso_yyyyweek(x any type) as ( cast(format_date("%G%V", x) as int) );
-create or replace function iso_yyyyday (x any type) as ( cast(format_date("%G%J", x) as int) ); -- 001-364 OR 001-371  !?!?!
+create or replace function iso_yyyyweek(x any type) as ( cast(format_date("%G%V", cast(x as date) ) as int64) );
+create or replace function iso_yyyyday (x any type) as ( cast(format_date("%G%J", cast(x as date) ) as int64) ); -- 001-364 OR 001-371  !?!?!
+assert iso_yyyyday('2023-01-01') = 2022364; assert iso_yyyyday('2023-01-02') = 2023001;
 
 create or replace function deg2rad(deg any type) as ( deg * acos(-1) / 180 ); assert deg2rad(180) == acos(-1); -- acos(-1) is pi!
 create or replace function rad2deg(rad any type) as ( rad * 180 / acos(-1) ); assert rad2deg(acos(-1)) == 180;
