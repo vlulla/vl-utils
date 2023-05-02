@@ -1,5 +1,5 @@
 import re,hypothesis as hy, hypothesis.strategies as st, typing, inspect, collections, random
-import numpy as np
+import numpy as np, pandas as pd, polars as pl
 
 def fix_colnames(colname: str, normalize_adjacent_uppers: bool = True) -> str:
   """
@@ -135,6 +135,26 @@ def print_source(obj) -> None:
       src = f"src {str(obj)} of built-in module, class, or function unavailable"
   print(src)
 
+
+def pandas_dataframes() -> typing.Optional[pd.DataFrame]:
+  frames = [(o,globals()[o]) for o in globals() if type(globals()[o]) == pd.DataFrame and o[0] != '_']
+  if len(frames) == 0:
+    print("No pd.DataFrame found in globals().", file=sys.stderr)
+    return None
+  result = pd.DataFrame({'dataframes': [n for n,_ in frames],
+                         'shape': [d.shape for _,d in frames],
+                         'cols': [d.columns.array.tolist() for _,d in frames],})
+  return result
+
+def polars_dataframes() -> typing.Optional[pl.DataFrame]:
+  frames = [(o,globals()[o]) for o in globals() if type(globals()[o]) == type(pl.DataFrame()) and o[0] != '_']
+  if len(frames) == 0:
+    print("No pl.DataFrame found in globals().", file=sys.stderr)
+    return None
+  result = pl.DataFrame({'dataframes': [n for n,_ in frames],
+                         'shape': [d.shape for _,d in frames],
+                         'cols': [d.columns for _,d in frames],})
+  return result
 
 ## some aliases ... especially useful in repl
 get_source = get_src = print_src = print_source
