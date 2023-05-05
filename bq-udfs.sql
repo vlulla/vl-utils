@@ -26,6 +26,14 @@ assert lastarrayelement([1]) = 1;
 assert lastarrayelement([struct(1 as x, 2 as y),(11,12),(21,22),(31,32)]) = (31,32);
 -- select lastarrayelement(15) should raise error! Since SQL is strongly typed arr can be only ARRAY type! Therefore BQ will raise an error here! SQL is awesome!
 
+-- some debugging related ideas...from the BQ book!
+-- create temp function debugarray(arr any type) as (array_to_string(arr, '*', '«»'));
+-- assert debugarray(['A','B',null,'D']) = 'A*B*«»*D';
+create temp function debugvalue(v any type) as (to_json_string(v)); -- to_json_string is much more general and works with everything...not just arrays!
+assert debugvalue(['A','B',null,'D']) = '["A","B",null,"D"]';
+assert debugvalue([struct('A' as a,'B' as b,null as c,'D' as d)]) = '[{"a":"A","b":"B","c":null,"d":"D"}]';
+
+-- geospatial realated stuff
 create or replace function deg2rad(deg any type) as ( deg * acos(-1) / 180 ); assert deg2rad(180) == acos(-1); -- acos(-1) is pi!
 create or replace function rad2deg(rad any type) as ( rad * 180 / acos(-1) ); assert rad2deg(acos(-1)) == 180;
 create or replace function cart2pol(x any type, y any type) as ( struct( sqrt(x*x + y*y) as rho, atan2(y, x) as phi) ); assert cart2pol(12, 5) = (13, 0.3947911); -- phi is in radians!
