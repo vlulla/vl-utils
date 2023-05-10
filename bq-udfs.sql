@@ -26,6 +26,17 @@ assert lastarrayelement([1]) = 1;
 assert lastarrayelement([struct(1 as x, 2 as y),(11,12),(21,22),(31,32)]) = (31,32);
 -- select lastarrayelement(15) should raise error! Since SQL is strongly typed arr can be only ARRAY type! Therefore BQ will raise an error here! SQL is awesome!
 
+create temp function compare_arrays(arr1 any type, arr2 any type) as (
+  if(array_length(arr1) <> array_length(arr2), false,
+    if(array_length(arr1)=0,true,
+      (select logical_and(x=arr2[offset(idx)]) from unnest(arr1) as x with offset as idx)))
+);
+assert compare_arrays([1],[]) = false;
+assert compare_arrays([],[]) = true;
+assert compare_arrays([1,2,3],[1,2,3]) = true;
+assert compare_arrays([1,2,3],[1.0,2,3]) = true; -- Arrays promoted to supertype double yielding ARRAY<DOUBLE> before comparison!
+-- assert compare_arrays([1,2,3],['a','b','c']) -- This will be unallowed by the typechecker!!! BQ is awesome!
+
 -- some debugging related ideas...from the BQ book!
 -- create temp function debugarray(arr any type) as (array_to_string(arr, '*', '«»'));
 -- assert debugarray(['A','B',null,'D']) = 'A*B*«»*D';
