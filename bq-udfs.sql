@@ -39,7 +39,9 @@ assert are_arrays_equal([1,2,3],[1.0,2,3]) = true; -- Arrays promoted to superty
 
 create temp function array_contains(arr any type, elt any type) as (
   if(array_length(arr)=0,false,
-   (select logical_or(elt=x) from unnest(arr) as x))
+   -- (select logical_or(elt=x) from unnest(arr) as x)
+   (EXISTS(select * from unnest(arr) as x where x = elt))
+  )
 );
 assert array_contains([1,2,3],1) = true;
 assert array_contains([],4) = false;
