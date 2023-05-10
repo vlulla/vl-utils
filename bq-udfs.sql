@@ -37,6 +37,16 @@ assert compare_arrays([1,2,3],[1,2,3]) = true;
 assert compare_arrays([1,2,3],[1.0,2,3]) = true; -- Arrays promoted to supertype double yielding ARRAY<DOUBLE> before comparison!
 -- assert compare_arrays([1,2,3],['a','b','c']) -- This will be unallowed by the typechecker!!! BQ is awesome!
 
+create temp function array_contains(arr any type, elt any type) as (
+  if(array_length(arr)=0,false,
+   (select logical_or(elt=x) from unnest(arr) as x))
+);
+assert array_contains([1,2,3],1) = true;
+assert array_contains([],4) = false;
+assert array_contains([1,2,3],1.0) = true;
+assert array_contains([1,2,3],1.5) = false;
+-- Again BQ maintains type conformity!! array_contains([1,2,3],'vl') is a type error!
+
 -- some debugging related ideas...from the BQ book!
 -- create temp function debugarray(arr any type) as (array_to_string(arr, '*', '«»'));
 -- assert debugarray(['A','B',null,'D']) = 'A*B*«»*D';
