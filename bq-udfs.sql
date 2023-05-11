@@ -16,6 +16,13 @@ create or replace function iso_yyyy_doy (x any type) as (cast(format_date("%G%J"
 assert iso_yyyy_doy ('2023-01-02') = 2023001;
 assert iso_yyyy_doy('2023-01-01') = 2022364; -- !!
 -- select d,iso_yyyy_woy(d) isowk,iso_yyyy_doy(d) isoday from unnest(generate_date_array('2023-01-01','2023-12-31',interval 1 day)) as d;
+create or replace function date_diff_to_seconds(dt1 date, dt2 date) as (
+  extract(day from dt1 - dt2) * 24 * 60 * 60
+);
+assert date_diff_to_seconds('2010-07-07','2010-07-07') = 0;
+assert date_diff_to_seconds('2008-12-25','2010-07-07') = -559*24*60*60;
+assert date_diff_to_seconds('2010-07-07','2008-12-25') =  559*24*60*60;
+
 
 create or replace function lastarrayelement(arr any type) as ( arr[safe_ordinal(array_length(arr))]);
 select lastarrayelement(a) from (select [1,2,3,4] as a union all select [] union all select [1]) s;
