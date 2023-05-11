@@ -20,7 +20,7 @@
 /^assert /d
 
 s/[[:space:]]--.*$//g
-s/[[:space:]]+/ /g
+## s/[[:space:]]+/ /g
 /^[[:space:]]*$/d
 
 s/` /`/g
