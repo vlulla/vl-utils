@@ -36,8 +36,9 @@ assert lastarrayelement([struct(1 as x, 2 as y),(11,12),(21,22),(31,32)]) = (31,
 create temp function are_arrays_equal(arr1 any type, arr2 any type) as (
   if(array_length(arr1) <> array_length(arr2), false,
     if(array_length(arr1)=0,true,
-      (select logical_and(x=arr2[offset(idx)]) from unnest(arr1) as x with offset as idx)))
+      (select logical_and(x=arr2[safe_offset(idx)]) from unnest(arr1) as x with offset as idx)))
 );
+assert (select logical_and(are_arrays_equal(n.f1,n.f2)=n.f3) from unnest([struct([] as f1, [] as f2, true as f3),([1],[],false),([1,2],[1,2],true),([],[1],false)]) as n) = true;
 assert are_arrays_equal([1],[]) = false;
 assert are_arrays_equal([],[]) = true;
 assert are_arrays_equal([1,2,3],[1,2,3]) = true;
