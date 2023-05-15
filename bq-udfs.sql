@@ -25,7 +25,7 @@ assert date_diff_to_seconds('2010-07-07','2008-12-25') =  559*24*60*60;
 
 
 create or replace function lastarrayelement(arr any type) as ( arr[safe_ordinal(array_length(arr))]);
-select lastarrayelement(a) from (select [1,2,3,4] as a union all select [] union all select [1]) s;
+-- select lastarrayelement(a) from (select [1,2,3,4] as a union all select [] union all select [1]) s;
 -- format-bq-query removes lines beginning with assert! Therefore, please keep assert[s] on one line!
 assert lastarrayelement([1,2,3,4]) = 4;
 assert lastarrayelement([]) is null;
