@@ -57,6 +57,14 @@ assert array_contains([1,2,3],1.0) = true;
 assert array_contains([1,2,3],1.5) = false;
 -- Again BQ maintains type conformity!! array_contains([1,2,3],'vl') is a type error!
 
+create temp function array_unique(arr any type) as (
+  (select coalesce(array_agg(distinct n), []) from unnest(arr) as n) -- coalesce needed to deal with empty arrays not yielding any rows which makes array_agg return null!
+);
+assert array_length(array_unique([])) = array_length([]);
+assert (select logical_and(array_contains([1,2,3,4,5,6],n)) from unnest(array_unique([1,2,3,1,2,3,4,5,6])) as n) and (array_length(array_unique([1,2,3,1,2,3,4,5,6]))=6);
+
+
+
 -- some debugging related ideas...from the BQ book!
 -- create temp function debugarray(arr any type) as (array_to_string(arr, '*', '«»'));
 -- assert debugarray(['A','B',null,'D']) = 'A*B*«»*D';
