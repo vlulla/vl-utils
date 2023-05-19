@@ -62,6 +62,7 @@ create temp function array_unique(arr any type) as (
 );
 assert array_length(array_unique([])) = array_length([]);
 assert (select logical_and(array_contains([1,2,3,4,5,6],n)) from unnest(array_unique([1,2,3,1,2,3,4,5,6])) as n) and (array_length(array_unique([1,2,3,1,2,3,4,5,6]))=6);
+assert (select logical_and(array_contains([4,1,3,5,6,2],n)) from unnest(array_unique([1,2,3,1,2,3,4,5,6])) as n);
 
 
 
