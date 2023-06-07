@@ -1,5 +1,6 @@
 import re,hypothesis as hy, hypothesis.strategies as st, typing, inspect, collections, random
 import numpy as np, pandas as pd, polars as pl
+from google.cloud import bigquery as bq
 
 def fix_colnames(colname: str, normalize_adjacent_uppers: bool = True) -> str:
   """
@@ -155,6 +156,20 @@ def polars_dataframes() -> typing.Optional[pl.DataFrame]:
                          'shape': [d.shape for _,d in frames],
                          'cols': [d.columns for _,d in frames],})
   return result
+
+BQParam = typing.Union[bq.ScalarQueryParameter, bq.ArrayQueryParameter, bq.StructQueryParameter]
+def gcp_to_df(qry: str, params:typing.List[BQParam], PROJECT:str) -> pd.DataFrame:
+  ## See:
+  ##   https://github.com/googleapis/python-bigquery/blob/main/samples/client_query_w_array_params.py
+  ##   https://github.com/googleapis/python-bigquery/blob/main/samples/client_query_w_named_params.py
+  ##   https://github.com/googleapis/python-bigquery/blob/main/samples/client_query_w_struct_params.py
+  params_in_qry = [p[1:] for p in re.findall(r"(@[a-zA-Z][a-zA-Z0-9]*)", qry)]
+  params_names = [p.name for p in params]
+  assert set(params_names).intersection(set(params_in_qry)) == set(params_in_qry), f"Params missing in query: {set(params_in_qry) - set(params_names)}"
+  job_config = bq.QueryJobConfig(query_parameters = params)
+  client = bq.Client(project=PROJECT)
+  return client.query(qry, job_config=job_config).to_dataframe()
+
 
 ## some aliases ... especially useful in repl
 get_source = get_src = print_src = print_source
