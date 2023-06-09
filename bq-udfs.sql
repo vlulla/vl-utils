@@ -44,6 +44,10 @@ assert are_arrays_equal([],[]) = true;
 assert are_arrays_equal([1,2,3],[1,2,3]) = true;
 assert are_arrays_equal([1,2,3],[1.0,2,3]) = true; -- Arrays promoted to supertype double yielding ARRAY<DOUBLE> before comparison!
 -- assert are_arrays_equal([1,2,3],['a','b','c']) -- This will be unallowed by the typechecker!!! BQ is awesome!
+-- The above function does not work when comparing array of struct which contains arrays. This is because BQ does not allow comparing arrays. This affects comparing structs too!
+-- with vars as (select struct(1 as id, 'item1' as lbl) as v1, struct(1.0 as tid, 'item1' as tt) as v2) select *,v1=v2 are_equal from vars; -- this works
+-- with vars as (select struct([1] as id, 'item1' as lbl) as v1, struct([1.0] as tid, 'item1' as tt) as v2) select *,v1=v2 are_eq from vars; -- this will NOT work! Because while structs are comparable when the constituent components are not ARRAY.
+-- Unsure if these restrictions apply for GEOGRAPHY (doubtful) and JSON (also doubtful). ## TODO (vijay): Verify this...
 
 create temp function array_contains(arr any type, elt any type) as (
   if(array_length(arr)=0,false,
