@@ -165,7 +165,7 @@ def gcp_to_df(qry: str, params:typing.List[BQParam], PROJECT:str) -> pd.DataFram
   ##   https://github.com/googleapis/python-bigquery/blob/main/samples/client_query_w_struct_params.py
   params_in_qry = [p[1:] for p in re.findall(r"(@[a-zA-Z][a-zA-Z0-9]*)", qry)]
   params_names = [p.name for p in params]
-  assert set(params_names).intersection(set(params_in_qry)) == set(params_in_qry), f"Params missing in query: {set(params_in_qry) - set(params_names)}"
+  assert set(params_names).intersection(set(params_in_qry)) == set(params_in_qry), f"Params in query missing from the params arg: {set(params_in_qry) - set(params_names)}"
   job_config = bq.QueryJobConfig(query_parameters = params)
   client = bq.Client(project=PROJECT)
   return client.query(qry, job_config=job_config).to_dataframe()
