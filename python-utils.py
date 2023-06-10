@@ -57,7 +57,7 @@ def test_colname_fixer(s: str):
   assert re.match('_[^_]_[^_]', s1) is None, f"Some special cols...{s} ==> {s1}"
 
 # Some stats related funcs
-def isiterable(x): return isinstance(x, (list, set, tuple, str, np.ndarray))
+def isiterable(x): return isinstance(x, (list, set, tuple, str, np.ndarray, range, pd.Series, pd.DataFrame))
 def isnumeric(x): return isinstance(x, (int, float, complex)) ## TODO (vijay): might need to include decimal.Decimal
 def avg(xs: typing.Iterable) -> float:
   assert isiterable(xs), "Not an iterable"
@@ -138,6 +138,18 @@ def print_source(obj) -> None:
   except TypeError:
       src = f"src {str(obj)} of built-in module, class, or function unavailable"
   print(src)
+
+def rangealong(l: typing.Iterable) -> typing.Iterable:
+  """
+  Like R's seq_along! But works differently for pd.DataFrame!
+  >>> rangealong(pd.DataFrame({'a':range(10),'b':[i*10 for i in range(10)]})) ## range(0,10)
+  R> seq_along(data.frame(a=1:10,b=10*(1:10))) ## [1] 1 2
+
+  In R: dataframe *is a list* of columns! ## R> is.list(data.frame(a=1:5)) ## TRUE
+  In python: dataframe is a collection of rows (or a tuple) of columns!
+  """
+  assert isiterable(l), f"Argument ({l}) is not iterable!"
+  return range(len(l))
 
 
 def pandas_dataframes() -> typing.Optional[pd.DataFrame]:
