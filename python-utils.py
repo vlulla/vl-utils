@@ -190,6 +190,30 @@ try:
 except NameError:
   print("Please install google-cloud-bigquery library", file=sys.stderr)
 
+def calculate_woe(df: pd.DataFrame, feature: str, target: str, zeroadjust=True) -> typing.Tuple[pd.DataFrame, float]:
+  ## https://documentation.sas.com/doc/en/vdmmlcdc/8.1/casstat/viyastat_binning_details02.htm
+  ## https://www.google.com/search?q=weight+of+evidence
+
+  assert feature in df.columns, f"{feature} not in {df.columns.tolist()}"
+  assert target in df.columns, f"{feature} not in {df.columns.tolist()}"
+
+  uniq_feats = df[feature].unique()
+  dset = pd.DataFrame([{'FeatVal': f"{feature}-{featval}", 'N': (df[feature]==featval).sum(),
+                        'NonEvent': ((df[feature]==featval) & (df[target]==0)).sum(),
+                        'Event': ((df[feature]==featval) & (df[target]==1)).sum()}
+                       for featval in uniq_feats])
+
+  TotNonEvent = dset['NonEvent'].sum()
+  TotEvent = dset['Event'].sum()
+  assert TotNonEvent == (df[target]==0).sum(), "NonEvent numbers don't match!"
+  assert TotEvent == (df[target]==1).sum(), "Event numbers don't match!"
+
+  x = 0.5 if zeroadjust == True else 0
+
+  dset['WoE'] = np.log(((dset['NonEvent'] + x)/TotNonEvent)/((dset['Event'] + x)/TotEvent))
+  iv = (((dset['NonEvent']/TotNonEvent) - (dset['Event']/TotEvent)) * dset['WoE']).sum()
+  return dset.loc[:,['FeatVal','WoE']], iv
+
 
 ## some aliases ... especially useful in repl
 get_source = get_src = print_src = print_source
