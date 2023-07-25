@@ -214,6 +214,9 @@ def calculate_woe(df: pd.DataFrame, feature: str, target: str, zeroadjust=True) 
   iv = (((dset['NonEvent']/TotNonEvent) - (dset['Event']/TotEvent)) * dset['WoE']).sum()
   return dset.loc[:,['FeatVal','WoE']], iv
 
+def df_coltypes(df: pd.DataFrame) -> pd.DataFrame:
+  cols_with_attrs = [(i,c,f"{str(df[c].dtype)}",df[c].nunique(),df[c].isna().sum(),100*df[c].isna().sum()/df.shape[0]) for i,c in enumerate(df.columns)]
+  return pd.DataFrame(cols_with_attrs, columns=["colidx", "colname", "coltype", "nunique", "numna", "pctna"])
 
 ## some aliases ... especially useful in repl
 get_source = get_src = print_src = print_source
