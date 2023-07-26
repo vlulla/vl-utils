@@ -224,6 +224,12 @@ def make_dataclass_from_df(df: pd.DataFrame, name_of_dataclass: str="DF"):
     >>> D = make_dataclass_from_df(d, "D")
     >>> _d = D(*d.iloc[0])
     >>> _d
+    >>> places = pd.DataFrame({"lat": [28.499163,34.044292,-33.889114], "lon": [34.518745,-118.904991,151.225204], "name": ["Dahab Freedivers, Egypt", "Barbie Dream House, Malibu, CA, USA", "Sydney Football Stadium, NSW, Australia"]})
+    >>> Place = make_dataclass_from_df(places, "Place")
+    >>> barbiehouse = Place(*places.iloc[[1],:].iloc[0]) ## for dataframe
+    >>> barbiehouse = Place(*places.iloc[1  ,:]        ) ## for series
+    >>> ## barbiehouse = Place(*places.iloc[[1],:]     ) ## NOTE: wrong!
+    >>> barbiehouseDf = pd.DataFrame({k:[v] for k,v in dc.asdict(barbiehouse).items()})
   """
   assert df.shape[1]>0, f"df.shape appears strange. {df.shape}"
 
