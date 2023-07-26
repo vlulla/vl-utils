@@ -1,4 +1,4 @@
-import re,hypothesis as hy, hypothesis.strategies as st, typing, inspect, collections, random, sys
+import re,hypothesis as hy, hypothesis.strategies as st, typing, inspect, collections, random, sys, dataclasses as dc
 import numpy as np, pandas as pd, polars as pl
 try:
   from google.cloud import bigquery as bq
