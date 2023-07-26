@@ -218,6 +218,19 @@ def df_coltypes(df: pd.DataFrame) -> pd.DataFrame:
   cols_with_attrs = [(i,c,f"{str(df[c].dtype)}",df[c].nunique(),df[c].isna().sum(),100*df[c].isna().sum()/df.shape[0]) for i,c in enumerate(df.columns)]
   return pd.DataFrame(cols_with_attrs, columns=["colidx", "colname", "coltype", "nunique", "numna", "pctna"])
 
+def make_dataclass_from_df(df: pd.DataFrame, name_of_dataclass: str="DF"):
+  """
+    >>> d = pd.DataFrame({f"col{i:02}": np.random.randn(10)*np.random.randint(50) for i in range(np.random.randint(5,25))})
+    >>> D = make_dataclass_from_df(d, "D")
+    >>> _d = D(*d.iloc[0])
+    >>> _d
+  """
+  assert df.shape[1]>0, f"df.shape appears strange. {df.shape}"
+
+  import dataclasses as dc
+  return dc.make_dataclass(name_of_dataclass, [(str(c).replace(' ','_'), df[c].dtypes.type) for c in df.columns])
+
+
 ## some aliases ... especially useful in repl
 get_source = get_src = print_src = print_source
 q=quit
