@@ -23,6 +23,12 @@ assert date_diff_to_seconds('2010-07-07','2010-07-07') = 0;
 assert date_diff_to_seconds('2008-12-25','2010-07-07') = -559*24*60*60;
 assert date_diff_to_seconds('2010-07-07','2008-12-25') =  559*24*60*60;
 
+-- See some thorough discussion at https://www.gnu.org/software/coreutils/faq/coreutils-faq.html#The-date-command-is-not-working-right_002e
+create or replace function yyyy_woy(x any type) as (cast(format_date('%Y%W', cast(x as date)) as int64) );
+assert mod(yyyy_woy(current_date()),100) between 0 and 53;
+create or replace function yyyy_doy(x any type) as (cast(format_date('%Y%j', cast(x as date)) as int64) );
+assert mod(yyyy_doy(current_date()),1000) between 1 and 366;
+
 
 create or replace function lastarrayelement(arr any type) as ( arr[safe_ordinal(array_length(arr))]);
 -- select lastarrayelement(a) from (select [1,2,3,4] as a union all select [] union all select [1]) s;
