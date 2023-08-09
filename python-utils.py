@@ -237,17 +237,20 @@ def make_dataclass_from_df(df: pd.DataFrame, name_of_dataclass: str="DF"):
   import dataclasses as dc
   return dc.make_dataclass(name_of_dataclass, [(str(c).replace(' ','_'), df[c].dtypes.type) for c in df.columns])
 
-def get_functions_for(o: typing.Any) -> typing.Dict[str,typing.Callable]:
+def get_callables_for(o: typing.Any) -> typing.Dict[str,typing.Callable]:
   """
-    >>> pd_funcs = (get_funtions_for(pd) | get_functions_for(pd.DataFrame) | get_functions_for(pd.Series))
+    >>> pd_funcs = (get_funtions_for(pd) | get_callables_for(pd.DataFrame) | get_callables_for(pd.Series))
     >>> df = pd.DataFrame([(name,inspect.signature(func),len(inspect.signature(func).parameters))
                            for name,func in pd_funcs.items()],columns=["funcname","sig","nparams"])
-    >>> all_funcs = functools.reduce(operator.or_,[get_functions_for(globals()[m]) for m in dir() if inspect.ismodule(globals()[m])], {})
+    >>> all_funcs = functools.reduce(operator.or_,[get_callables_for(globals()[m]) for m in dir() if inspect.ismodule(globals()[m])], {})
     >>> df = pd.DataFrame([(name,inspect.signature(func),len(inspect.signature(func).parameters))
                            for name,func in all_funcs.items()],columns=["funcname","sig","nparams"])
     >>> df.sort_values("nparams",ascending=False).iloc[:5,:]
+    >>> lgb_callables = get_callables_for(lgb)
+    >>> ldf = pd.DataFrame([(fn,inspect.signature(fc),len(inspect.signature(fc).parameters),str(type(fc)))
+                            for fn,fc in lgb_callables.items()],columns=["callablename","sig","nparams","callabletype"])
   """
-  return {f"{o.__name__}.{fname}": getattr(o,fname) for fname in dir(o) if inspect.isfunction(getattr(o,fname))}
+  return {f"{o.__name__}.{fname}": getattr(o,fname) for fname in dir(o) if callable(getattr(o,fname))}
 
 ## some aliases ... especially useful in repl
 get_source = get_src = print_src = print_source
