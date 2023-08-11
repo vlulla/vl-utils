@@ -158,9 +158,10 @@ def pandas_dataframes() -> typing.Optional[pd.DataFrame]:
   if len(frames) == 0:
     print("No pd.DataFrame found in globals().", file=sys.stderr)
     return None
-  result = pd.DataFrame({'dataframes': [n for n,_ in frames],
-                         'shape': [d.shape for _,d in frames],
-                         'cols': [d.columns.array.tolist() for _,d in frames],})
+  result = pd.DataFrame({'dataframe': [n for n,_ in frames],
+                         'nrow': [d.shape[0] for _,d in frames],
+                         'ncol': [d.shape[1] for _,d in frames],
+                         'columns': [d.columns.array.tolist() for _,d in frames],})
   return result
 
 def polars_dataframes() -> typing.Optional[pl.DataFrame]:
@@ -168,9 +169,10 @@ def polars_dataframes() -> typing.Optional[pl.DataFrame]:
   if len(frames) == 0:
     print("No pl.DataFrame found in globals().", file=sys.stderr)
     return None
-  result = pl.DataFrame({'dataframes': [n for n,_ in frames],
-                         'shape': [d.shape for _,d in frames],
-                         'cols': [d.columns for _,d in frames],})
+  result = pl.DataFrame({'dataframe': [n for n,_ in frames],
+                         'nrow': [d.shape[0] for _,d in frames],
+                         'ncol': [d.shape[1] for _,d in frames],
+                         'columns': [d.columns for _,d in frames],})
   return result
 
 try:
