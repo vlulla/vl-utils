@@ -238,7 +238,7 @@ def make_dataclass_from_df(df: pd.DataFrame, name_of_dataclass: str="DF"):
 
 def get_callables_for(o: typing.Any) -> typing.Dict[str,typing.Callable]:
   """
-    >>> pd_funcs = (get_funtions_for(pd) | get_callables_for(pd.DataFrame) | get_callables_for(pd.Series))
+    >>> pd_funcs = (get_callables_for(pd) | get_callables_for(pd.DataFrame) | get_callables_for(pd.Series))
     >>> df = pd.DataFrame([(name,inspect.signature(func),len(inspect.signature(func).parameters))
                            for name,func in pd_funcs.items()],columns=["funcname","sig","nparams"])
     >>> all_funcs = functools.reduce(operator.or_,[get_callables_for(globals()[m]) for m in dir() if inspect.ismodule(globals()[m])], {})
