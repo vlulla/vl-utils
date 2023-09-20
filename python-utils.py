@@ -240,14 +240,26 @@ def get_callables_for(o: typing.Any) -> typing.Dict[str,typing.Callable]:
   """
     >>> pd_funcs = (get_callables_for(pd) | get_callables_for(pd.DataFrame) | get_callables_for(pd.Series))
     >>> df = pd.DataFrame([(name,inspect.signature(func),len(inspect.signature(func).parameters))
-                           for name,func in pd_funcs.items()],columns=["funcname","sig","nparams"])
+                           for name,func in pd_funcs.items() if type(func)!=type],columns=["funcname","sig","nparams"])
     >>> all_funcs = functools.reduce(operator.or_,[get_callables_for(globals()[m]) for m in dir() if inspect.ismodule(globals()[m])], {})
     >>> df = pd.DataFrame([(name,inspect.signature(func),len(inspect.signature(func).parameters))
-                           for name,func in all_funcs.items()],columns=["funcname","sig","nparams"])
+                           for name,func in all_funcs.items() if type(func)!=type],columns=["funcname","sig","nparams"])
     >>> df.sort_values("nparams",ascending=False).iloc[:5,:]
     >>> lgb_callables = get_callables_for(lgb)
     >>> ldf = pd.DataFrame([(fn,inspect.signature(fc),len(inspect.signature(fc).parameters),str(type(fc)))
-                            for fn,fc in lgb_callables.items()],columns=["callablename","sig","nparams","callabletype"])
+                            for fn,fc in lgb_callables.items() if type(fc)!=type],columns=["callablename","sig","nparams","callabletype"])
+
+    Many of the above have stopped working! Python has lots of types that cannot be inspected...and i do not yet know how to filter these types out!
+    >>> collections.Counter(type(v) for _,v in all_funcs.items())
+    >>> cannot_be_inspected = set(); type_not_supported = set()
+    >>> for n,v in all_funcs.items():
+    ...   try:
+    ...     inspect.signature(v)
+    ...   except ValueError:
+    ...     cannot_be_inspected.add(v)
+    ...   except TypeError:
+    ...     type_not_supported.add(v)
+    >>> ## inspect.signature(random.choice(tuple(cannot_be_inspected)))
   """
   return {f"{o.__name__}.{fname}": getattr(o,fname) for fname in dir(o) if callable(getattr(o,fname))}
 
