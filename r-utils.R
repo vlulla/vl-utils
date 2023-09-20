@@ -274,11 +274,13 @@ lsos <- lsobjs <- .ls.objects  <- function(pos=1L, pattern, order.by, decreasing
   ##
   ## Modified to sort correctly based on size! There's a subtle bug in the SO answer
 
+  classes <- function(x) paste(class(x), collapse=", ")
   napply <- function(names, fn) sapply(names, function(x) fn(get(x, pos=pos)))
   names <- ls(pos=pos, pattern=pattern)
   if(length(names) == 0L) return(character(0))
 
-  obj.class <- napply(names, function(x) as.character(class(x))[[1]])
+  ## obj.class <- napply(names, function(x) as.character(class(x))[[1]])
+  obj.class <- napply(names, classes)
   obj.mode <- napply(names, base::mode)
   obj.type <- ifelse(is.na(obj.class), obj.mode, obj.class)
   obj.size <- napply(names, function(x) {
@@ -290,7 +292,7 @@ lsos <- lsobjs <- .ls.objects  <- function(pos=1L, pattern, order.by, decreasing
   obj.dim[vec, 1] <- napply(names, length)[vec]
 
   out <- data.frame(obj.type, obj.size, obj.dim)
-  names(out) <- c("Type", "Size", "Rows", "Columns")
+  names(out) <- c("Type/Class", "Size", "Rows", "Columns")
 
   if(any(obj.type %in% c("RasterStack", "RasterBrick", "SpatRaster"))) {
     nlayers <- function(x) ifelse(inherits(x, c("RasterStack", "RasterBrick")),
