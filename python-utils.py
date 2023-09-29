@@ -41,6 +41,9 @@ def fix_colnames(colname: str, normalize_adjacent_uppers: bool = True) -> str:
   return fixed_colname
 
 
+T = typing.TypeVar("T")
+def identity(x: T) -> T: return x ## surprisingly useful!
+
 ## @hy.settings(max_examples=500) # more thorough but slower
 @hy.given(st.text(min_size=1))
 def test_colname_fixer(s: str):
