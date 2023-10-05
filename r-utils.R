@@ -578,3 +578,14 @@ permutations <- function(x, n=6L) {
   }
   res
 }
+
+generate_random_date_range <- function(start_date, end_date, num_days) {
+  ## Useful function to generate a date range based on start/end dates...
+  ##
+  ## R> generate_random_date_range(as.Date('2000-01-01'),as.Date('2022-12-31'), 30L)
+  ## R> generate_random_date_range(as.Date('2000-01-01'),as.Date('2022-12-31'), as.integer(sample(365,1))) ## much more useful...imo
+  ##
+  stopifnot(class(start_date)==class(Sys.Date()), class(end_date)==class(Sys.Date()), is.integer(num_days),
+     end_date > start_date, end_date - start_date > num_days)
+  with(list(start_dt=sample(seq(start_date, end_date - num_days, by='1 day'),1)),seq(start_dt, start_dt+num_days,by='1 day'))
+}
