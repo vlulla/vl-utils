@@ -266,6 +266,14 @@ def get_callables_for(o: typing.Any) -> typing.Dict[str,typing.Callable]:
   """
   return {f"{o.__name__}.{fname}": getattr(o,fname) for fname in dir(o) if callable(getattr(o,fname))}
 
+def grid(axis="both"):
+  ## Neat idea from https://github.com/norvig/pytudes/blob/main/ipynb/BikeCode.ipynb
+  import matplotlib.pyplot as plt
+  ## plt.rcParams['figure.figsize'] = (12, 6)
+  plt.minorticks_on()
+  plt.grid(which="major", ls="-", alpha=3/4, axis=axis)
+  plt.grid(which="minor", ls=":", alpha=1/2, axis=axis)
+
 ## some aliases ... especially useful in repl
 get_source = get_src = print_src = print_source
 q=quit
