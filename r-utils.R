@@ -60,7 +60,8 @@ rad2deg <- function(r) r * 180 / pi
 cart2pol <- function(x,y) {
   ρ <- sqrt(x^2+y^2)
   θ <- atan2(y,x)
-  list(rho=ρ,phi=θ) ## symbols are hard to type in R console!
+  ## list(ρ=ρ,θ=θ) ## symbols are hard to type in R console!
+  list(rho=ρ,phi=θ)
 }
 pol2cart <- function(ρ,θ) {
   list(x=ρ*cos(θ), y=ρ*sin(θ))
@@ -584,7 +585,7 @@ generate_random_date_range <- function(start_date, end_date, num_days) {
   ##
   ## R> generate_random_date_range(as.Date('2000-01-01'),as.Date('2022-12-31'), 30L)
   ## R> generate_random_date_range(as.Date('2000-01-01'),as.Date('2022-12-31'), as.integer(sample(365,1))) ## much more useful...imo
-  ## R> generate_random_date_rante(as.Date('2000-01-01'),as.Date('2022-12-31'), as.integer(sample(c(365,366),1,prob=c(3/4,1/4)))) ## even more interesting!
+  ## R> generate_random_date_range(as.Date('2000-01-01'),as.Date('2022-12-31'), as.integer(sample(c(365,366),1,prob=c(3/4,1/4)))) ## even more interesting!
   ##
   stopifnot(class(start_date)==class(Sys.Date()), class(end_date)==class(Sys.Date()), is.integer(num_days),
      end_date > start_date, end_date - start_date >= num_days)
