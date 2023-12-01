@@ -589,5 +589,5 @@ generate_random_date_range <- function(start_date=as.Date('2000-01-01'), end_dat
   ##
   stopifnot(class(start_date)==class(Sys.Date()), class(end_date)==class(Sys.Date()), is.integer(num_days),
      end_date > start_date, end_date - start_date >= num_days)
-  with(list(start_dt=sample(seq(start_date, end_date - num_days, by='1 day'),1)),seq(start_dt, start_dt+num_days,by='1 day'))
+  with(list(start_dt=sample(seq(start_date, end_date - num_days, by='1 day'),1)),seq(start_dt, start_dt+num_days-1,by='1 day'))
 }
