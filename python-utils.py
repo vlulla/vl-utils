@@ -3,7 +3,8 @@ import numpy as np, pandas as pd, polars as pl
 import functools,operator
 try:
   from google.cloud import bigquery as bq
-except ModuleNotFoundError:
+except ModuleNotFoundError as e:
+  print(f"ERROR: {e}",file=sys.stderr)
   print("Please install google-cloud-bigquery library", file=sys.stderr)
 
 def fix_colnames(colname: str, normalize_adjacent_uppers: bool = True) -> str:
@@ -139,8 +140,9 @@ def print_source(obj) -> None:
   import inspect
   try:
       src = inspect.getsource(obj)
-  except TypeError:
+  except TypeError as e:
       src = f"src {str(obj)} of built-in module, class, or function unavailable"
+      print(f"{e}",file=sys.stderr)
   print(src)
 
 def rangealong(l: typing.Iterable) -> typing.Iterable:
@@ -190,8 +192,8 @@ try:
     job_config = bq.QueryJobConfig(query_parameters = params)
     client = bq.Client(project=PROJECT)
     return client.query(qry, job_config=job_config).to_dataframe()
-except NameError:
-  print("Please install google-cloud-bigquery library", file=sys.stderr)
+except NameError as e:
+  print(f"ERROR: {e}",file=sys.stderr)
 
 def calculate_woe(df: pd.DataFrame, feature: str, target: str, zeroadjust=True) -> typing.Tuple[pd.DataFrame, float]:
   ## https://documentation.sas.com/doc/en/vdmmlcdc/8.1/casstat/viyastat_binning_details02.htm
