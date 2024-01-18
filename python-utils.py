@@ -1,11 +1,20 @@
-import re,hypothesis as hy, hypothesis.strategies as st, typing, inspect, collections, random, sys, dataclasses as dc
-import numpy as np, pandas as pd, polars as pl
+import re, typing, inspect, collections, random, sys, dataclasses as dc
+import numpy as np, pandas as pd
 import functools,operator
+try:
+  import hypothesis as hy, hypothesis.strategies as st
+except ModuleNotFoundError as e:
+  print(f"ERROR: {e}",file=sys.stderr)
+
+try:
+  import polars as pl
+except ModuleNotFoundError as e:
+  print(f"ERROR: {e}",file=sys.stderr)
+
 try:
   from google.cloud import bigquery as bq
 except ModuleNotFoundError as e:
   print(f"ERROR: {e}",file=sys.stderr)
-  print("Please install google-cloud-bigquery library", file=sys.stderr)
 
 def fix_colnames(colname: str, normalize_adjacent_uppers: bool = True) -> str:
   """
@@ -45,8 +54,8 @@ def fix_colnames(colname: str, normalize_adjacent_uppers: bool = True) -> str:
 T = typing.TypeVar("T")
 def identity(x: T) -> T: return x ## surprisingly useful!
 
-## @hy.settings(max_examples=500) # more thorough but slower
-@hy.given(st.text(min_size=1))
+## ## @hy.settings(max_examples=500) # more thorough but slower
+## @hy.given(st.text(min_size=1))
 def test_colname_fixer(s: str):
   ## TODO: update this with asserts capturing failures that I'm bound to run into
   s1 = fix_colnames(s)
@@ -169,13 +178,16 @@ def pandas_dataframes() -> typing.Optional[pd.DataFrame]:
                         columns=["dataframe","nrow","ncol","columns"])
   return result
 
-def polars_dataframes() -> typing.Optional[pl.DataFrame]:
-  frames = [(o,globals()[o]) for o in globals() if type(globals()[o]) == type(pl.DataFrame()) and o[0] != '_']
-  if len(frames) == 0:
-    print("No pl.DataFrame found in globals().", file=sys.stderr)
-    return None
-  result = pl.DataFrame([(n, *d.shape, d.columns) for n,d in frames],schema=["dataframe","nrow","ncol","columns"])
-  return result
+try:
+  def polars_dataframes() -> typing.Optional[pl.DataFrame]:
+    frames = [(o,globals()[o]) for o in globals() if type(globals()[o]) == type(pl.DataFrame()) and o[0] != '_']
+    if len(frames) == 0:
+      print("No pl.DataFrame found in globals().", file=sys.stderr)
+      return None
+    result = pl.DataFrame([(n, *d.shape, d.columns) for n,d in frames],schema=["dataframe","nrow","ncol","columns"])
+    return result
+except NameError as e:
+  print(f"ERROR: {e}",file=sys.stderr)
 
 try:
   BQParam = typing.Union[bq.ScalarQueryParameter, bq.ArrayQueryParameter, bq.StructQueryParameter]
