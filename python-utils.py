@@ -299,7 +299,7 @@ def grep(regex: str, lst: typing.List[str]) -> typing.List[str]:
   regexc = re.compile(regex, re.IGNORECASE | re.UNICODE | re.VERBOSE)
   return [c for c in lst if re.search(regexc, c) is not None]
 
-def gsub(regex: str, repl: str, lst: typing.List[str]) -> typing.List[str]:
+def gsub(regex: str, repl: str, lst: typing.Union[str, typing.List[str]]) -> typing.List[str]:
   """
   Like R's gsub function...
   >>> gsub("_spend$", "", df.columns)
@@ -309,6 +309,7 @@ def gsub(regex: str, repl: str, lst: typing.List[str]) -> typing.List[str]:
   def _gsub(_regex: str, _repl: str, _string: str) -> str:
     regexc = re.compile(_regex, re.IGNORECASE | re.UNICODE | re.VERBOSE)
     return re.sub(regexc, _repl, _string)
+  if type(lst) == type(''): return _gsub(regex, repl, lst)
   return [_gsub(regex, repl, c) for c in lst]
 
 ## some aliases ... especially useful in repl
