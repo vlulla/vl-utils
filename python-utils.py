@@ -288,6 +288,29 @@ def grid(axis="both"):
   plt.grid(which="major", ls="-", alpha=3/4, axis=axis)
   plt.grid(which="minor", ls=":", alpha=1/2, axis=axis)
 
+def grep(regex: str, lst: typing.List[str]) -> typing.List[str]:
+  """
+  Like R's grep function...
+  >>> grep("_spend", ['abc', 'xyz_spend', 'abc_spend_xyz'])
+  >>> grep("_spend$", ['abc', 'xyz_spend', 'abc_spend_xyz'])
+  >>> grep("_spned", ['abc', 'xyz_spend', 'abc_spend_xyz']) ## typo in regex
+  >>> grep("_spend$", df.columns) ## extract spend cols
+  """
+  regexc = re.compile(regex, re.IGNORECASE | re.UNICODE | re.VERBOSE)
+  return [c for c in lst if re.search(regexc, c) is not None]
+
+def gsub(regex: str, repl: str, lst: typing.List[str]) -> typing.List[str]:
+  """
+  Like R's gsub function...
+  >>> gsub("_spend$", "", df.columns)
+  >>> gsub("_spend$", "", grep("_spend$", df.columns))
+  """
+  @cache
+  def _gsub(_regex: str, _repl: str, _string: str) -> str:
+    regexc = re.compile(_regex, re.IGNORECASE | re.UNICODE | re.VERBOSE)
+    return re.sub(regexc, _repl, _string)
+  return [_gsub(regex, repl, c) for c in lst]
+
 ## some aliases ... especially useful in repl
 get_source = get_src = print_src = print_source
 q=quit
