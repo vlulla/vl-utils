@@ -288,15 +288,17 @@ def grid(axis="both"):
   plt.grid(which="major", ls="-", alpha=3/4, axis=axis)
   plt.grid(which="minor", ls=":", alpha=1/2, axis=axis)
 
-def grep(regex: str, lst: typing.List[str]) -> typing.List[str]:
+def grep(regex: str, lst: typing.List[str], invert=False) -> typing.List[str]:
   """
   Like R's grep function...
   >>> grep("_spend", ['abc', 'xyz_spend', 'abc_spend_xyz'])
   >>> grep("_spend$", ['abc', 'xyz_spend', 'abc_spend_xyz'])
   >>> grep("_spned", ['abc', 'xyz_spend', 'abc_spend_xyz']) ## typo in regex
   >>> grep("_spend$", df.columns) ## extract spend cols
+  >>> grep("_spend$", df.columns, invert=True) ## everything except spend cols
   """
   regexc = re.compile(regex, re.IGNORECASE | re.UNICODE | re.VERBOSE)
+  if invert: return [c for c in lst if re.search(regexc, c) is None]
   return [c for c in lst if re.search(regexc, c) is not None]
 
 def gsub(regex: str, repl: str, lst: typing.Union[str, typing.List[str]]) -> typing.List[str]:
