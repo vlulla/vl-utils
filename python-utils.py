@@ -305,7 +305,7 @@ def gsub(regex: str, repl: str, lst: typing.Union[str, typing.List[str]]) -> typ
   >>> gsub("_spend$", "", df.columns)
   >>> gsub("_spend$", "", grep("_spend$", df.columns))
   """
-  @cache
+  @functools.cache
   def _gsub(_regex: str, _repl: str, _string: str) -> str:
     regexc = re.compile(_regex, re.IGNORECASE | re.UNICODE | re.VERBOSE)
     return re.sub(regexc, _repl, _string)
