@@ -314,6 +314,22 @@ def gsub(regex: str, repl: str, lst: typing.Union[str, typing.List[str]]) -> typ
   if type(lst) == type(''): return _gsub(regex, repl, lst)
   return [_gsub(regex, repl, c) for c in lst]
 
+P = typing.ParamSpec('P')
+def negate(pred: collections.abc.Callable[P, bool]) -> collections.abc.Callable[P, bool]:
+  """
+  This is useful for filter. And, it is also like itertools.filterfalse
+
+  >>> def isodd(x): return x % 2 != 0
+  >>> [i for i in range(15) if isodd(i)]
+  >>> [i for i in range(15) if negate(isodd)(i)]
+  >>> iseven = negate(isodd)
+  >>> assert [i for i in range(15) if iseven(i)] == [i for i in range(15) if not isodd(i)]
+  >>> assert list(itertools.filterfalse(lambda x: x%2, range(10))) == list(filter(negate(lambda x: x%2), range(10)))
+  """
+  def _inner(*args: P.args, **kwargs: P.kwargs) -> bool:
+    return not pred(*args,**kwargs)
+  return _inner
+
 ## some aliases ... especially useful in repl
 get_source = get_src = print_src = print_source
 q=quit
