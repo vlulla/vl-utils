@@ -132,7 +132,7 @@ def repeat(x, n: int = 1) -> typing.List:
   assert type(n) == int and n > 0
   return [x for _ in range(n)]
 
-def genrandstr(n: int = 5) -> str:
+def genrandstr(n: int = 5, lowercase=False) -> str:
   " >>> [genrandstr(random.randint(2,8)) for _ in range(random.randint(5,10))] "
 
   assert type(n) == int
@@ -140,9 +140,12 @@ def genrandstr(n: int = 5) -> str:
 
   assert n > 0, f'invalid arg {n}'
 
-  chars=[chr(ord('A')+i) for i in range(26)] + [chr(ord('a')+i) for i in range(26)] # + [chr(ord('0')+i) for i in range(10)]
-  idx = [random.randint(0,len(chars)) for _ in range(n)]
-  return ''.join(chars[i%len(chars)] for i in idx)
+  ## chars=[chr(ord('A')+i) for i in range(26)] + [chr(ord('a')+i) for i in range(26)] # + [chr(ord('0')+i) for i in range(10)]
+  ## idx = [random.randint(0,len(chars)) for _ in range(n)]
+  ## return ''.join(chars[i%len(chars)] for i in idx)
+  import string
+  chars = string.ascii_lowercase + ('' if lowercase else string.ascii_uppercase)
+  return ''.join(random.choice(chars) for _ in range(n))
 
 def print_source(obj) -> None:
   """ interesting function to find out how stuff is defined in python. check out print_source(print_source) ! """
