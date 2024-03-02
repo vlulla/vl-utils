@@ -299,7 +299,11 @@ def grep(regex: str, lst: typing.List[str], invert=False) -> typing.List[str]:
   >>> grep("_spned", ['abc', 'xyz_spend', 'abc_spend_xyz']) ## typo in regex
   >>> grep("_spend$", df.columns) ## extract spend cols
   >>> grep("_spend$", df.columns, invert=True) ## everything except spend cols
+  >>> grep("_spend", df) ## this also works!
   """
+  assert isinstance(regex, str)
+  assert isinstance(lst, list)
+  assert all(isinstance(o, str) for o in lst)
   regexc = re.compile(regex, re.IGNORECASE | re.UNICODE | re.VERBOSE)
   if invert: return [c for c in lst if re.search(regexc, c) is None]
   return [c for c in lst if re.search(regexc, c) is not None]
@@ -310,6 +314,11 @@ def gsub(regex: str, repl: str, lst: typing.Union[str, typing.List[str]]) -> typ
   >>> gsub("_spend$", "", df.columns)
   >>> gsub("_spend$", "", grep("_spend$", df.columns))
   """
+  assert isinstance(regex, str)
+  assert isinstance(repl, str)
+  assert isinstance(lst, (str, list))
+  if isinstance(lst, list): assert all(isinstance(i, str) for i in lst)
+
   @functools.cache
   def _gsub(_regex: str, _repl: str, _string: str) -> str:
     regexc = re.compile(_regex, re.IGNORECASE | re.UNICODE | re.VERBOSE)
