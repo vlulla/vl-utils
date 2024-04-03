@@ -297,9 +297,8 @@ def grep(regex: str, lst: typing.List[str], invert=False) -> typing.List[str]:
   >>> grep("_spend", ['abc', 'xyz_spend', 'abc_spend_xyz'])
   >>> grep("_spend$", ['abc', 'xyz_spend', 'abc_spend_xyz'])
   >>> grep("_spned", ['abc', 'xyz_spend', 'abc_spend_xyz']) ## typo in regex
-  >>> grep("_spend$", df.columns) ## extract spend cols
-  >>> grep("_spend$", df.columns, invert=True) ## everything except spend cols
-  >>> grep("_spend", df) ## this also works!
+  >>> grep("_spend$", df.columns.tolist()) ## extract spend cols
+  >>> grep("_spend$", df.columns.tolist(), invert=True) ## everything except spend cols
   """
   assert isinstance(regex, str)
   assert isinstance(lst, list)
@@ -311,8 +310,8 @@ def grep(regex: str, lst: typing.List[str], invert=False) -> typing.List[str]:
 def gsub(regex: str, repl: str, lst: typing.Union[str, typing.List[str]]) -> typing.List[str]:
   """
   Like R's gsub function...
-  >>> gsub("_spend$", "", df.columns)
-  >>> gsub("_spend$", "", grep("_spend$", df.columns))
+  >>> gsub("_spend$", "", df.columns.tolist())
+  >>> gsub("_spend$", "", grep("_spend$", df.columns.tolist()))
   """
   assert isinstance(regex, str)
   assert isinstance(repl, str)
