@@ -341,6 +341,22 @@ def negate(pred: collections.abc.Callable[P, bool]) -> collections.abc.Callable[
     return not pred(*args,**kwargs)
   return _inner
 
+def make_param_grid(param: dict) -> pd.DataFrame:
+  """
+  Trying to emulate R's expand.grid.
+  R> expand.grid(x=1:5,y=12:13)
+  >>> make_param_grid({'x':[1,2,3,4,5],'y':[12,13]})
+  >>> make_param_grid({'chgpt_prior_scale':np.linspace(0.001,0.5,num=5).tolist(),
+                       'holidays_prior_scale': np.linspace(0.01,10,num=5).tolist()})
+  """
+  assert isinstance(param, dict)
+  assert all(isinstance(v, list) for v in param.values())
+  import itertools
+  df = pd.DataFrame(itertools.product(*param.values()),columns=param)
+  assert df.shape == (np.prod([len(_) for _ in param.values()]), len(param))
+  return df
+
+
 ## some aliases ... especially useful in repl
 get_source = get_src = print_src = print_source
 q=quit
