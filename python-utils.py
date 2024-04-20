@@ -1,20 +1,17 @@
 import re, typing, inspect, collections, random, sys, dataclasses as dc
 import numpy as np, pandas as pd
 import functools,operator
-try:
-  import hypothesis as hy, hypothesis.strategies as st
-except ModuleNotFoundError as e:
-  print(f"ERROR: {e}",file=sys.stderr)
+try: import hypothesis as hy, hypothesis.strategies as st
+except ModuleNotFoundError as e: print(f"ERROR: {e}",file=sys.stderr)
 
-try:
-  import polars as pl
-except ModuleNotFoundError as e:
-  print(f"ERROR: {e}",file=sys.stderr)
+try: import polars as pl
+except ModuleNotFoundError as e: print(f"ERROR: {e}",file=sys.stderr)
 
-try:
-  from google.cloud import bigquery as bq
-except ModuleNotFoundError as e:
-  print(f"ERROR: {e}",file=sys.stderr)
+try: from google.cloud import bigquery as bq
+except ModuleNotFoundError as e: print(f"ERROR: {e}",file=sys.stderr)
+
+try: import duckdb as ddb
+except ModuleNotFoundError as e: print(f"ERROR: {e}", file=sys.stderr)
 
 def fix_colnames(colname: str, normalize_adjacent_uppers: bool = True) -> str:
   """
