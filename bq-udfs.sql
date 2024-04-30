@@ -83,6 +83,11 @@ create temp function debugvalue(v any type) as (to_json_string(v)); -- to_json_s
 assert debugvalue(['A','B',null,'D']) = '["A","B",null,"D"]';
 assert debugvalue([struct('A' as a,'B' as b,null as c,'D' as d)]) = '[{"a":"A","b":"B","c":null,"d":"D"}]';
 
+
+-- Like Python's divmod function...i've needed this more than a few times...
+create temp function divmod(x, y) as ( (div(x,y), mod(x,y)) );
+assert divmod(199001,100) = (1990, 1); -- Especially useful if you store YYYYMM as an int!!
+
 -- geospatial realated stuff
 create or replace function deg2rad(deg any type) as ( deg * acos(-1) / 180 ); assert deg2rad(180) == acos(-1); -- acos(-1) is pi!
 create or replace function rad2deg(rad any type) as ( rad * 180 / acos(-1) ); assert rad2deg(acos(-1)) == 180;
