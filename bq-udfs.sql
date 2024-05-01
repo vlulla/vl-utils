@@ -6,6 +6,18 @@
 
 create or replace function round2(x any type) as ( round(x, 2) );
 create or replace function round3(x any type) as ( round(x, 3) );
+create temp function median(arr any type) as ( (select percentile_cont(x, 0.5) over() from unnest(arr) as x limit 1) );
+ASSERT median(ARRAY<float64>[1,2,3,4,5,6,7,8,9,10]) = 5.5;
+-- R's quantile
+create temp function quantile(arr any type) as ( [(select percentile_cont(x, 0) over() from unnest(arr) as x limit 1),
+                                                  (select percentile_cont(x, 0.25) over() from unnest(arr) as x limit 1),
+                                                  (select percentile_cont(x, 0.5) over() from unnest(arr) as x limit 1),
+                                                  (select percentile_cont(x, 0.75) over() from unnest(arr) as x limit 1),
+                                                  (select percentile_cont(x, 1) over() from unnest(arr) as x limit 1)]);
+-- ASSERT are_arrays_equal(quantile([1.0,2,3,4,5,6,7,8,9,10]), [1,3.25,5.5,7.75,10]); -- see below for definition of are_arrays_equal udf
+create temp function IQR(arr any type) as ( quantile(arr)[safe_ordinal(4)] - quantile(arr)[safe_ordinal(2)]);
+ASSERT IQR([7,7,31,31,47,75,87,115,116,119,119,155,177]) = 88;
+
 
 -- https://webspace.science.uu.nl/~gent0113/calendar/isocalendar.htm for iso calendar algorithms!
 
@@ -82,6 +94,37 @@ assert (select logical_and(array_contains([4,1,3,5,6,2],n)) from unnest(array_un
 create temp function debugvalue(v any type) as (to_json_string(v)); -- to_json_string is much more general and works with everything...not just arrays!
 assert debugvalue(['A','B',null,'D']) = '["A","B",null,"D"]';
 assert debugvalue([struct('A' as a,'B' as b,null as c,'D' as d)]) = '[{"a":"A","b":"B","c":null,"d":"D"}]';
+
+-- dot product
+-- NOTE (vijay) 2024.05.01: Apparently `dot_product` appears to be reserved built-in name for future use by BQ! Therefore, renaming this function to ddot_product.
+CREATE TEMP FUNCTION ddot_product(a1 ANY type, a2 ANY type) AS (
+    CASE WHEN ARRAY_LENGTH(a1) <> ARRAY_LENGTH(a2) THEN ERROR('Lengths ' || array_length(a1) || ' and ' || array_length(a2) || ' are not equal!')
+    ELSE
+    (
+      WITH
+	tbl1 AS ( SELECT n1, idx FROM UNNEST(a1) AS n1 WITH OFFSET AS idx),
+	tbl2 AS ( SELECT n2, idx FROM UNNEST(a2) AS n2 WITH OFFSET AS idx)
+      SELECT SUM(n1*n2) FROM tbl1 INNER JOIN tbl2 USING (idx)
+    )
+    END
+);
+ASSERT ddot_product(ARRAY[1, 2, 5], ARRAY[1, 2, 3]) = 20;
+-- ASSERT ddot_product(ARRAY[1, 2, 5], ARRAY[1, 2, 3, 4]) = 'Lengths 3 and 4 are not equal!'; -- TODO (vijay): figure out how to check this....
+
+CREATE TEMP FUNCTION magnitude(arr any type) AS (
+  sqrt(ddot_product(arr, arr))
+);
+ASSERT magnitude(ARRAY[1,2,5]) = sqrt(30);
+ASSERT magnitude(ARRAY[1,2,3]) = sqrt(14);
+
+-- BQ has cosine_distance which is 1 - cosine_similarity! Better to use cosine_distance than rely on this function here!
+CREATE TEMP FUNCTION cosine_similarity(a1 ANY type, a2 ANY type) AS (
+  dot_product(a1, a2)/(magnitude(a1)*magnitude(a2))
+);
+ASSERT cosine_similarity(ARRAY[0,0,0,1,1,1,1,1,2,1,2,0,1,0], ARRAY[0,1,1,1,0,0,1,0,1,1,1,0,1,1]) = 1 - cosine_distance(ARRAY[0.0,0,0,1,1,1,1,1,2,1,2,0,1,0], ARRAY[0.0,1,1,1,0,0,1,0,1,1,1,0,1,1]);
+ASSERT cosine_similarity(ARRAY[0,1,1,1,0,0,1,0,1,1,1,0,1,1], ARRAY[1,0,0,2,0,0,0,0,0,0,0,1,0,0]) = 1 - cosine_distance(ARRAY[0.0,1,1,1,0,0,1,0,1,1,1,0,1,1], ARRAY[1.0,0,0,2,0,0,0,0,0,0,0,1,0,0]);
+-- ASSERT cosine_similarity(ARRAY[0,0,0,1,1,1,1,1,2,1,2,0,1,0], ARRAY[1,0,0,2,0,0,0,0,0,0,0,1,0,0]) = 1 - cosine_distance(ARRAY[0.0,0,0,1,1,1,1,1,2,1,2,0,1,0], ARRAY[1.0,0,0,2,0,0,0,0,0,0,0,1,0,0]);
+ASSERT cast(cosine_similarity(ARRAY[0,0,0,1,1,1,1,1,2,1,2,0,1,0], ARRAY[1,0,0,2,0,0,0,0,0,0,0,1,0,0]) as numeric) = cast(1 - cosine_distance(ARRAY[0.0,0,0,1,1,1,1,1,2,1,2,0,1,0], ARRAY[1.0,0,0,2,0,0,0,0,0,0,0,1,0,0]) as numeric);
 
 
 -- Like Python's divmod function...i've needed this more than a few times...
