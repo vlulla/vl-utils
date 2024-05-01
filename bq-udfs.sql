@@ -85,7 +85,7 @@ assert debugvalue([struct('A' as a,'B' as b,null as c,'D' as d)]) = '[{"a":"A","
 
 
 -- Like Python's divmod function...i've needed this more than a few times...
-create temp function divmod(x, y) as ( (div(x,y), mod(x,y)) );
+create temp function divmod(x any type, y any type) as ( (div(x,y), mod(x,y)) );
 assert divmod(199001,100) = (1990, 1); -- Especially useful if you store YYYYMM as an int!!
 
 -- geospatial realated stuff
