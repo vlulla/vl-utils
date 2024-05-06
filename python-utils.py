@@ -353,6 +353,24 @@ def make_param_grid(param: dict) -> pd.DataFrame:
   assert df.shape == (np.prod([len(_) for _ in param.values()]), len(param))
   return df
 
+def args(o: object) -> inspect.Signature:
+  """
+  Trying to emulate R's args function.
+
+  >>> args(args)
+  >>> args(prophet.Prophet)
+  >>> args(str) ## does not work
+  >>> [(o,args(getattr(builtins,o))) for o in dir(builtins) if callable(getattr(builtins,o)) and args(getattr(builtins,o)) is not None]
+
+  Does not work for builtin functions like str and int (possibly others too).
+  """
+  assert callable(o), "Need a callable object"
+  try:
+    sig = inspect.signature(o)
+  except ValueError as e:
+    print(f"{e}", file=sys.stderr)
+    sig = None
+  return sig
 
 ## some aliases ... especially useful in repl
 get_source = get_src = print_src = print_source
