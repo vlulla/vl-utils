@@ -58,14 +58,13 @@ deg2rad <- function(d) d * pi / 180
 rad2deg <- function(r) r * 180 / pi
 # https://stackoverflow.com/a/26757297
 cart2pol <- function(x,y) {
-  ρ <- sqrt(x^2+y^2)
-  θ <- atan2(y,x)
+  rho <- sqrt(x^2+y^2)
+  phi <- atan2(y,x)
   ## list(ρ=ρ,θ=θ) ## symbols are hard to type in R console!
-  list(rho=ρ,phi=θ)
+  list(rho=rho,phi=phi)
 }
-pol2cart <- function(ρ,θ) {
-  list(x=ρ*cos(θ), y=ρ*sin(θ))
-}
+## pol2cart <- function(ρ,θ) { list(x=ρ*cos(θ), y=ρ*sin(θ)) }
+pol2cart <- function(rho,phi) { list(x=rho*cos(phi), y=rho*sin(phi)) }
 
 cov.pop <- function(x, y=NULL, ...) { cov(x, y, ...) * (NROW(x)-1)/NROW(x) }
 var.pop <- function(x, ...) { var(x, ...) * (NROW(x)-1)/NROW(x) }
@@ -330,7 +329,7 @@ colDetails <- function(DF) {
   colidx <- seq_along(DF)
   num_nas <- sapply(DF, numna)
   num_uniq <- sapply(DF, num_unique)
-  data.table(ColName=colnames, ColClasses=colclasses, ColIdx=colidx, NumNA=num_nas, PctNA=round(100*num_nas/nrow(DF),2), NumUniq=num_uniq, PctUniq=round(100*num_uniq/nrow(DF),3), row.names=NULL)
+  data.table(ColName=colnames, ColClasses=colclasses, ColIdx=colidx, NumNA=num_nas, PctNA=round(100*num_nas/nrow(DF),3), NumUniq=num_uniq, PctUniq=round(100*num_uniq/nrow(DF),3), row.names=NULL)
 }
 
 issorted <- function(x) all(order(x) == seq_along(x))
@@ -590,6 +589,12 @@ generate_random_date_range <- function(start_date=as.Date('2000-01-01'), end_dat
   stopifnot(class(start_date)==class(Sys.Date()), class(end_date)==class(Sys.Date()), is.integer(num_days),
      end_date > start_date, end_date - start_date >= num_days)
   with(list(start_dt=sample(seq(start_date, end_date - num_days, by='1 day'),1)),seq(start_dt, start_dt+num_days-1,by='1 day'))
+}
+
+gcp_to_DT <- function(qry, params=list(), project="dev-datascience-345114") {
+  tb <- bq_project_query(project,qry)
+  DT <- as.data.table(bq_table_download(tb))
+  DT
 }
 
 ## especially useful for install.packages("pkg",lib=lastElem(.libPaths()))
