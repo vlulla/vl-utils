@@ -591,9 +591,10 @@ generate_random_date_range <- function(start_date=as.Date('2000-01-01'), end_dat
   with(list(start_dt=sample(seq(start_date, end_date - num_days, by='1 day'),1)),seq(start_dt, start_dt+num_days-1,by='1 day'))
 }
 
-gcp_to_DT <- function(qry, params=list(), project="dev-datascience-345114") {
+gcp_to_DT <- function(qry, project, params=list()) {
+  ## TODO (vijay): figure out how to run bq_perform_query. See https://github.com/r-dbi/bigrquery/blob/HEAD/R/bq-perform.R
   tb <- bq_project_query(project,qry)
-  DT <- as.data.table(bq_table_download(tb))
+  DT <- as.data.table(bq_table_download(tb,bigint="integer64"))
   DT
 }
 
