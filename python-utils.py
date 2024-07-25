@@ -1,4 +1,4 @@
-import re, typing, inspect, collections, random, sys, dataclasses as dc
+import re, typing, inspect, collections, random, sys, dataclasses as dc,math
 import numpy as np, pandas as pd
 import functools,operator
 try: import hypothesis as hy, hypothesis.strategies as st
@@ -95,6 +95,21 @@ def freq(xs: typing.Iterable) -> collections.Counter:
   """
   assert isiterable(xs), "Not an iterable"
   return collections.Counter(xs)
+def softmax(xs,base=math.exp(1)):
+  """
+  Even though the most commonly used base is e, any other base (greater than 0) can be used.
+  If the base is > 1 then larger values will get higher probabilities.
+  If 0 < base < 1 then smaller values will get higher probabilities.
+
+  >>> x = np.random.standard_normal(15)
+  >>> softmax(x.tolist())
+  >>> softmax(x.tolist(),base=0.8)
+  >>> pd.DataFrame({'x':x,'softmax':sofmtax(x.tolist()),'softmax1':sofmtax(x.tolist(),base=0.8)})
+  """
+  assert isiterable(xs)
+  assert all(isnumeric(x) for x in xs)
+  exps = type(xs)(base**x for x in xs)       ## does not work with np.ndarray! Use softmax(np.random.standard_normal(15).tolist())
+  return type(xs)(e/sum(exps) for e in exps)
 
 # Some text related funcs
 def squote(x): return f"'{x}'"
@@ -371,6 +386,7 @@ def args(o: object) -> inspect.Signature:
     print(f"{e}", file=sys.stderr)
     sig = None
   return sig
+
 
 ## some aliases ... especially useful in repl
 get_source = get_src = print_src = print_source

@@ -429,6 +429,10 @@ poisson_binomial <- function(theta) {
   return(alpha[N + 1, 1:(N + 1)]);
 }
 
+## if base > 1 then higher values get assigned higher probabilities
+## if 0 < base < 1 then lower values get assigned higher probabilities
+softmax <- function(x,base=exp(1)) (base^x)/sum(base^x)
+
 freqsdt <- freqsDT <- function(DT, groupcols, percent=TRUE) {
 
   ## Idea of freqsdt from https://st2.ning.com/topology/rest/1.0/file/get/4077505910?profile=original
