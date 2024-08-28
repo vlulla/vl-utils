@@ -329,7 +329,8 @@ colDetails <- function(DF) {
   colidx <- seq_along(DF)
   num_nas <- sapply(DF, numna)
   num_uniq <- sapply(DF, num_unique)
-  data.table(ColName=colnames, ColClasses=colclasses, ColIdx=colidx, NumNA=num_nas, PctNA=round(100*num_nas/nrow(DF),3), NumUniq=num_uniq, PctUniq=round(100*num_uniq/nrow(DF),3), row.names=NULL)
+  histosparks <- sapply(DF, histospark) ## see below for histospark
+  data.table(ColName=colnames, ColClasses=colclasses, ColIdx=colidx, NumNA=num_nas, PctNA=round(100*num_nas/nrow(DF),3), NumUniq=num_uniq, PctUniq=round(100*num_uniq/nrow(DF),3), Histogram=histosparks, row.names=NULL)
 }
 
 issorted <- function(x) all(order(x) == seq_along(x))
@@ -604,3 +605,12 @@ gcp_to_DT <- function(qry, project, params=list()) {
 
 ## especially useful for install.packages("pkg",lib=lastElem(.libPaths()))
 lastElem <- lastelem <- function(l)l[[length(l)]]
+
+## Learned of this from Richard McElreath's book.
+## Found this on https://github.com/hadley/precis/blob/master/R/histospark.R
+histospark <- function(x, width=10L) {
+  sparks <- c("\u2581","\u2582","\u2583",'\u2585','\u2587')
+  bins <- graphics::hist(x, breaks=width, plot=FALSE)
+  factor <- cut(bins$counts / max(bins$counts), breaks=seq(0L,1L,length=length(sparks)+1L),labels=sparks,include.lowest=TRUE)
+  paste0(factor,collapse="")
+}
