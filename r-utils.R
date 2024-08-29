@@ -333,8 +333,18 @@ colDetails <- function(DF) {
   for(i in seq_len(ncol(DF))) {
     if(class(DF[[i]]) %in% c("factor","character")) { DFM[[i]] <- as.numeric(rep(NA,nrow(DFM))) }
   }
+  colstats <- function(x, na.rm=TRUE) {
+    ## idea from McElreath's rethinking::precis function
+    stats <- c(mean(x,na.rm=na.rm), sd(x,na.rm=na.rm), quantile(x,probs=c(0.055,0.945)))
+    names(stats) <- c("mean","sd","5.5%","94.5%")
+    stats
+  }
+  stats <- t(apply(DF,2,colstats))
   histosparks <- sapply(DFM, histospark) ## see below for histospark
-  data.table(ColName=colnames, ColClasses=colclasses, ColIdx=colidx, NumNA=num_nas, PctNA=round(100*num_nas/nrow(DF),3), NumUniq=num_uniq, PctUniq=round(100*num_uniq/nrow(DF),3), Histogram=histosparks, row.names=NULL)
+  DD <- data.table(ColName=colnames, ColClasses=colclasses, ColIdx=colidx, NumNA=num_nas, PctNA=round(100*num_nas/nrow(DF),3), NumUniq=num_uniq, PctUniq=round(100*num_uniq/nrow(DF),3), row.names=NULL)
+  DD <- cbind(DD, stats)
+  DD[,Histogram:=histosparks]
+  DD[]
 }
 
 issorted <- function(x) all(order(x) == seq_along(x))
