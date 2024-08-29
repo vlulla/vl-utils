@@ -331,7 +331,7 @@ colDetails <- function(DF) {
   num_uniq <- sapply(DF, num_unique)
   DFM <- copy(DF)
   for(i in seq_len(ncol(DF))) {
-    if(any(class(DF[[i]]) %in% c("factor","character"))) { DFM[[i]] <- as.numeric(rep(NA,nrow(DFM))) }
+    if(any(class(DF[[i]]) %in% c("factor","character","Date","POSIXct","POSIXlt"))) { DFM[[i]] <- as.numeric(rep(NA,nrow(DFM))) }
   }
   colstats <- function(x, na.rm=TRUE, digits=3L) {
     ## idea from McElreath's rethinking::precis function
