@@ -119,7 +119,7 @@ ASSERT magnitude(ARRAY[1,2,3]) = sqrt(14);
 
 -- BQ has cosine_distance which is 1 - cosine_similarity! Better to use cosine_distance than rely on this function here!
 CREATE TEMP FUNCTION cosine_similarity(a1 ANY type, a2 ANY type) AS (
-  dot_product(a1, a2)/(magnitude(a1)*magnitude(a2))
+  ddot_product(a1, a2)/(magnitude(a1)*magnitude(a2))
 );
 ASSERT cosine_similarity(ARRAY[0,0,0,1,1,1,1,1,2,1,2,0,1,0], ARRAY[0,1,1,1,0,0,1,0,1,1,1,0,1,1]) = 1 - cosine_distance(ARRAY[0.0,0,0,1,1,1,1,1,2,1,2,0,1,0], ARRAY[0.0,1,1,1,0,0,1,0,1,1,1,0,1,1]);
 ASSERT cosine_similarity(ARRAY[0,1,1,1,0,0,1,0,1,1,1,0,1,1], ARRAY[1,0,0,2,0,0,0,0,0,0,0,1,0,0]) = 1 - cosine_distance(ARRAY[0.0,1,1,1,0,0,1,0,1,1,1,0,1,1], ARRAY[1.0,0,0,2,0,0,0,0,0,0,0,1,0,0]);
@@ -132,7 +132,7 @@ create temp function divmod(x any type, y any type) as ( (div(x,y), mod(x,y)) );
 assert divmod(199001,100) = (1990, 1); -- Especially useful if you store YYYYMM as an int!!
 
 -- geospatial realated stuff
-create or replace function deg2rad(deg any type) as ( deg * acos(-1) / 180 ); assert deg2rad(180) == acos(-1); -- acos(-1) is pi!
-create or replace function rad2deg(rad any type) as ( rad * 180 / acos(-1) ); assert rad2deg(acos(-1)) == 180;
+create or replace function deg2rad(deg any type) as ( deg * acos(-1) / 180 ); assert deg2rad(180) = acos(-1); -- acos(-1) is pi!
+create or replace function rad2deg(rad any type) as ( rad * 180 / acos(-1) ); assert rad2deg(acos(-1)) = 180;
 create or replace function cart2pol(x any type, y any type) as ( struct( sqrt(x*x + y*y) as rho, atan2(y, x) as phi) ); assert cart2pol(12, 5) = (13, 0.3947911); -- phi is in radians!
 create or replace function pol2cart(rho any type, phi any type) as ( struct(rho*cos(phi) as x, rho*sin(phi) as y) ); assert pol2cart(13, 0.3947911) = (12, 5);
