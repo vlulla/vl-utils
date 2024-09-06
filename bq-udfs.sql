@@ -131,7 +131,7 @@ ASSERT cast(cosine_similarity(ARRAY[0,0,0,1,1,1,1,1,2,1,2,0,1,0], ARRAY[1,0,0,2,
 create temp function divmod(x any type, y any type) as ( (div(x,y), mod(x,y)) );
 assert divmod(199001,100) = (1990, 1); -- Especially useful if you store YYYYMM as an int!!
 
-create temp aggregate function positivesum(x numeric) as ( if(sum(x)<0, 0, sum(x)) ); -- constrain aggregate sum to [0, inf). Useful for revenue and counts which are required to +ve only. NOTE: temporary aggregate functions are disallowed in PIVOT clause!
+create temp aggregate function positivesum(x numeric) as ( if(sum(x)<0, null, sum(x)) ); -- constrain aggregate sum to [0, inf). Useful for revenue and counts which are required to +ve only. NOTE: temporary aggregate functions are disallowed in PIVOT clause!
 
 -- geospatial realated stuff
 create or replace function deg2rad(deg any type) as ( deg * acos(-1) / 180 ); assert deg2rad(180) = acos(-1); -- acos(-1) is pi!
