@@ -207,6 +207,9 @@ except NameError as e:
 try:
   BQParam = typing.Union[bq.ScalarQueryParameter, bq.ArrayQueryParameter, bq.StructQueryParameter]
   def gcp_to_df(qry: str, params:typing.List[BQParam] = [], PROJECT:str = '') -> pd.DataFrame:
+    """Example usage:
+    df = gcp_to_df(qry="select * from `bigquery-public-data.idc_v17.dicom_all` where StudyDate=@dt",params=bq.ScalarQueryParameter("dt","DATE",datetime.date(2010,1,1)),PROJECT="<your-project>")
+    """
     ## See:
     ##   https://github.com/googleapis/python-bigquery/blob/main/samples/client_query_w_array_params.py
     ##   https://github.com/googleapis/python-bigquery/blob/main/samples/client_query_w_named_params.py
