@@ -629,6 +629,9 @@ lastElem <- lastelem <- function(l)l[[length(l)]]
 ## Found this on https://github.com/hadley/precis/blob/master/R/histospark.R
 histospark <- function(x, width=10L) {
   if(all(is.na(x))){return("")}
+  if(is.integer64(x)) { ## NA values in integer64 cause weird printing and plotting errors
+    x <- as.numeric(x)
+  }
   sparks <- c("\u2581","\u2582","\u2583",'\u2585','\u2587')
   bins <- graphics::hist(x, breaks=width, plot=FALSE)
   factor <- cut(bins$counts / max(bins$counts), breaks=seq(0L,1L,length=length(sparks)+1L),labels=sparks,include.lowest=TRUE)
