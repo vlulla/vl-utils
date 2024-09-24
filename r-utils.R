@@ -629,6 +629,7 @@ lastElem <- lastelem <- function(l)l[[length(l)]]
 ## Found this on https://github.com/hadley/precis/blob/master/R/histospark.R
 histospark <- function(x, width=10L) {
   if(all(is.na(x))){return("")}
+  if(!(is.numeric(x) | is.integer64(x))){return("")}
   if(is.integer64(x)) { ## NA values in integer64 cause weird printing and plotting errors
     x <- as.numeric(x)
   }
