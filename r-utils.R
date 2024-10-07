@@ -638,3 +638,17 @@ histospark <- function(x, width=10L) {
   factor <- cut(bins$counts / max(bins$counts), breaks=seq(0L,1L,length=length(sparks)+1L),labels=sparks,include.lowest=TRUE)
   paste0(factor,collapse="")
 }
+
+getAllObjects <- function() {
+  ## This can be used to determine where the object is coming from...
+  ##
+  ## I stumbled upon this when trying to figure out how to get `colSums` to work with `integer64`. I learned that `colSums` is definedin `package:Matrix` as well as `package:base`.
+  ## This is also evident when you do `?colSums` where R will ask you which function documentation you wish to read.
+  envs <- search()
+  getObjects <- function(env) {
+    objs <- ls(name=env)
+    searchIdx <- which(env==search())
+    data.table(searchidx=searchIdx,env=env,obj=objs,obj_type=sapply(objs,function(s)typeof(get(s,env))))
+  }
+  rbindlist(lapply(envs,getObjects))
+}
