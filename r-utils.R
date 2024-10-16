@@ -618,7 +618,8 @@ generate_random_date_range <- function(start_date=as.Date('2000-01-01'), end_dat
 gcp_to_DT <- function(qry, project, params=list()) {
   ## TODO (vijay): figure out how to run bq_perform_query. See https://github.com/r-dbi/bigrquery/blob/HEAD/R/bq-perform.R
   tb <- bq_project_query(project,qry) ## require('bigrquery')
-  DT <- as.data.table(bq_table_download(tb,bigint="integer64")) ## ensure that you use `fill=bit64::as.integer64(NA)` in `dcast.data.table`!
+  ## DT <- as.data.table(bq_table_download(tb,bigint="integer64")) ## ensure that you use `fill=bit64::as.integer64(NA)` in `dcast.data.table`!
+  DT <- as.data.table(bq_table_download(tb))
   DT
 }
 
