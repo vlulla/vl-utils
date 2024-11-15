@@ -48,7 +48,7 @@ assert mod(yyyy_doy(current_date()),1000) between 1 and 366;
 -- 4. This will open the temporary session (which lasts for 24 hrs...can be seen from expires at timestamp) that BQ has created for this tab. Copy the temporary dataset_id (ought to begin with the prefix '_') and prefix calendar_year with it. You will have to use bquotes!
 --    4a. create or replace table function `«project_id»._«temporary-session-id»`.calendar_year
 --    4b. Annoyingly, i cannot call this TVF (table-valued function) without the complete path!
-create or replace table function calendar_year(yr any type) as (with _ as (select cast(dt as date) as dt from unnest(generate_date_array(cast(yr||'-01-01' as date),cast(yr||'-12-31' as date),interval 1 day)) as dt) select dt,format_date('%a',dt) as dow,extract(year from dt)||extract(quarter from dt) as yyyyqtr from _);
+create or replace table function calendar_year(yr any type) as (with _ as (select cast(dt as date) as dt from unnest(generate_date_array(cast(yr||'-01-01' as date),cast(yr||'-12-31' as date),interval 1 day)) as dt) select dt,format_date('%a',dt) as dow,cast(format_date('%Y%Q',dt) as int) as yyyyqtr from _);
 
 
 create or replace function lastarrayelement(arr any type) as ( arr[safe_ordinal(array_length(arr))]);
