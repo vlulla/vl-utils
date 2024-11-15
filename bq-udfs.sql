@@ -41,6 +41,15 @@ assert mod(yyyy_woy(current_date()),100) between 0 and 53;
 create or replace function yyyy_doy(x any type) as (cast(format_date('%Y%j', cast(x as date)) as int64) );
 assert mod(yyyy_doy(current_date()),1000) between 1 and 366;
 
+-- NOTE (vijay): BQ does not allow creating this without project/dataset_id info. So, if you wish to create this in a temporary session follow this:
+-- 1. Open a new tab in BQ console and enable "Session Mode".
+-- 2. create temporary table tst(x int);
+-- 3. The results pane in the bottom will have a blue button stating "Go to this table". Click it.
+-- 4. This will open the temporary session (which lasts for 24 hrs...can be seen from expires at timestamp) that BQ has created for this tab. Copy the temporary dataset_id (ought to begin with the prefix '_') and prefix calendar_year with it. You will have to use bquotes!
+--    4a. create or replace table function `«project_id»._«temporary-session-id»`.calendar_year
+--    4b. Annoyingly, i cannot call this TVF (table-valued function) without the complete path!
+create or replace table function calendar_year(yr any type) as (with _ as (select cast(dt as date) as dt from unnest(generate_date_array(cast(yr||'-01-01' as date),cast(yr||'-12-31' as date),interval 1 day)) as dt) select dt,format_date('%a',dt) as dow,extract(year from dt)||extract(quarter from dt) as yyyyqtr from _);
+
 
 create or replace function lastarrayelement(arr any type) as ( arr[safe_ordinal(array_length(arr))]);
 -- select lastarrayelement(a) from (select [1,2,3,4] as a union all select [] union all select [1]) s;
