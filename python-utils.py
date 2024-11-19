@@ -13,6 +13,9 @@ except ModuleNotFoundError as e: print(f"ERROR: {e}",file=sys.stderr)
 try: import duckdb as ddb
 except ModuleNotFoundError as e: print(f"ERROR: {e}", file=sys.stderr)
 
+try: import pyarrow as pa
+except ModuleNotFoundError as e: print(f"ERROR: {e}", file=sys.stderr)
+
 def fix_colnames(colname: str, normalize_adjacent_uppers: bool = True) -> str:
   """
     Similar to the algorithm described at https://pandoc.org/MANUAL.html#extension-auto_identifiers
@@ -222,6 +225,10 @@ try:
     job_config = bq.QueryJobConfig(query_parameters = params)
     client = bq.Client(project=PROJECT)
     return client.query(qry, job_config=job_config).to_dataframe()
+  def gcp_to_polars(qry: str, params:typing.List[BQParam]=[], PROJECT:str='') -> pl.DataFrame:
+    df = gcp_to_df(qry,params,PROJECT)
+    dfp = pl.from_arrow(pa.Table.from_pandas(df)) ## NOTE (vijay): need this because pl.from_pandas(df) cannot read db_dtypes.dbdate datatype!
+    return dfp
 except NameError as e:
   print(f"ERROR: {e}",file=sys.stderr)
 
