@@ -336,11 +336,11 @@ colDetails <- function(DF) {
   colstats <- function(x, na.rm=TRUE, digits=3L) {
     ## idea from McElreath's rethinking::precis function
     stats <- if(is.numeric(x)) {
-      c(round(mean(x,na.rm=na.rm),digits=digits), round(sd(x,na.rm=na.rm),digits=digits), round(quantile(x,probs=c(0.055,0.945),na.rm=na.rm),digits=digits))
+      c(round(mean(x,na.rm=na.rm),digits=digits), round(sd(x,na.rm=na.rm),digits=digits), round(quantile(x,probs=c(0,0.055,0.5,0.945,1),na.rm=na.rm),digits=digits))
     } else {
-      c(NA, NA, NA, NA)
+      c(NA, NA, NA, NA, NA, NA, NA)
     }
-    names(stats) <- c("mean","sd","5.5%","94.5%")
+    names(stats) <- c("mean","sd","min","5.5%","median","94.5%","max")
     stats
   }
   ## stats <- t(apply(DF,2,colstats))
