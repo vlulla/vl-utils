@@ -71,7 +71,8 @@ def test_colname_fixer(s: str):
   assert re.match('_[^_]_[^_]', s1) is None, f"Some special cols...{s} ==> {s1}"
 
 # Some stats related funcs
-def isiterable(x): return isinstance(x, (list, set, tuple, str, np.ndarray, range, pd.Series, pd.DataFrame))
+##def isiterable(x): return isinstance(x, (list, set, tuple, str, np.ndarray, range, pd.Series, pd.DataFrame))
+def isiterable(x): return '__iter__' in dir(x)
 def isnumeric(x): return isinstance(x, (int, float, complex)) ## TODO (vijay): might need to include decimal.Decimal
 def avg(xs: typing.Iterable) -> float:
   assert isiterable(xs), "Not an iterable"
