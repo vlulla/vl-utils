@@ -227,6 +227,7 @@ try:
     client = bq.Client(project=PROJECT)
     return client.query(qry, job_config=job_config).to_dataframe()
   def gcp_to_polars(qry: str, params:typing.List[BQParam]=[], PROJECT:str='') -> pl.DataFrame:
+    ## NOTE (vijay): This does not work with Interval/Duration types! I get the error "The datatype tin (for IntervalUnit::MonthDayNanon) is still not supported in Rust implementation....see https://arrow.apache.org/rust/src/arrow_schema/ffi.rs.html
     df = gcp_to_df(qry,params,PROJECT)
     dfp = pl.from_arrow(pa.Table.from_pandas(df)) ## NOTE (vijay): need this because pl.from_pandas(df) cannot read db_dtypes.dbdate datatype!
     return dfp
