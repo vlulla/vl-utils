@@ -35,4 +35,5 @@ create or replace macro date_trunc_week_like_bq(dt) as (select (date_trunc('week
 
 -- convert currency formatted numbers into mathematical numbers
 -- can only deal with '$'!
-create or replace macro money_to_numeric(d) as ( select replace(replace(replace(replace(d,'$',''),',',''),')',''),'(','-')::numeric );
+create or replace macro money_to_numeric(d) as ( select replace(replace(replace(replace(d,'$',''),',',''),')',''),'(','-')::numeric(19,2) );
+-- with _ as (select unnest(['-$1,234.10','$1,234.10','($1,234.10)','($0.99999)', '   $0.3333333333333333', '    ($0.3333333333333333)     ', '$0.0', '($6.080089694185882e-110)','($4.080089694185882e-10)     ']) as m) select m,'"'||m||'"' as "m with quotes",money_to_numeric(m) as mm from _;
