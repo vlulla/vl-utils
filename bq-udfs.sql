@@ -142,6 +142,12 @@ assert divmod(199001,100) = (1990, 1); -- Especially useful if you store YYYYMM 
 
 create temp aggregate function positivesum(x numeric) as ( if(sum(x)<0, null, sum(x)) ); -- constrain aggregate sum to [0, inf). Useful for revenue and counts which are required to +ve only. NOTE: temporary aggregate functions are disallowed in PIVOT clause!
 
+create or replace function money_to_numeric(m any type) as (cast(replace(replace(replace(replace(d,'$',''),',',''),')',''),'(','-') as numeric) );
+assert money_to_numeric('(1,283.4)') = -1283.4;
+assert money_to_numeric('$(1,283.4)') = -1283.4;
+assert money_to_numeric('(1,234,567.8') = -1234567.8;
+assert money_to_numeric(' 1,234,567.8') =  1234567.8; -- spaces handled automatically? NOTE (vijay): verify this...
+
 -- geospatial realated stuff
 create or replace function deg2rad(deg any type) as ( deg * acos(-1) / 180 ); assert deg2rad(180) = acos(-1); -- acos(-1) is pi!
 create or replace function rad2deg(rad any type) as ( rad * 180 / acos(-1) ); assert rad2deg(acos(-1)) = 180;

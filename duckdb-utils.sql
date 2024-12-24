@@ -32,3 +32,7 @@ create or replace macro days_around_date(date,ndays) as TABLE(select generate_se
 --
 -- with _ as (select unnest(generate_series(current_date()-interval 5 day,current_date()+interval 5 day,interval 1 day))::date as _) select _,date_trunc('week',_) as defaut_date_trunc,date_trunc_week_like_bq(_) as "date_trunc-like-BQ" from _;
 create or replace macro date_trunc_week_like_bq(dt) as (select (date_trunc('week',dt::date+interval 1 day)-interval 1 day)::date);
+
+-- convert currency formatted numbers into mathematical numbers
+-- can only deal with '$'!
+create or replace macro money_to_numeric(d) as ( select replace(replace(replace(replace(d,'$',''),',',''),')',''),'(','-')::numeric );
