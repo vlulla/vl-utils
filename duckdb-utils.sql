@@ -14,7 +14,9 @@ create or replace macro calendar_year(yr) as TABLE (select * from calendar_betwe
 -- select * from random_date_range(10);
 -- select * from random_date_range(floor(365*random())::int); -- even better!
 -- with _ as (select * from random_date_range(floor(365*random())::int)) select length(dates) as len,dates from _;
-create or replace macro random_date_range(ndays) as TABLE (with _ as (select '2000-01-01'::date + floor((current_date() - '2000-01-01'::date)*random())::int as start_date) select generate_series(start_date,start_date + ndays,interval 1 day)::date[] as dates from _);
+-- with _ as (select floor(random()*50)::int as n) select n,dates from _ JOIN random_date_range(n) on TRUE; -- n comes from _ CTE!
+-- with _ as (select floor(random()*50)::int as n) select n,dates from _,random_date_range(n); -- same as previous...but JOIN is implicit...
+create or replace macro random_date_range(ndays) as TABLE (with _ as (select '2000-01-01'::date + floor((current_date() - '2000-01-01'::date)*random())::int as start_date) select generate_series(start_date,start_date + ndays - 1,interval 1 day)::date[] as dates from _);
 
 -- select * from days_around_date('2024-11-28'::date,5); -- query to generate a window around a date. This is very useful for creating windows to compare times from different years.
 -- Here's an interesting use case: comparing a month around thanksgiving/black friday for different years. For instance, comparing cybermondays on 2023 and 2024 can be compared by using date axes: days_around_date('2024-12-02'::date,15) and days_around_date('2023-11-27'::date,15)!!
