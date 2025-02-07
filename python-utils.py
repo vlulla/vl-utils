@@ -168,9 +168,9 @@ def get_source(obj) -> str:
   def _get_src(o) -> str:
     import inspect
     try:
-      src = inspect.getsource(obj)
+      src = inspect.getsource(o)
     except TypeError as e:
-      src = f"src {str(obj)} of built-in module, class, or function unavailable"
+      src = f"src {str(o)} of built-in module, class, or function unavailable"
       print(f"{e}",file=sys.stderr)
     return src
   return _get_src(obj)
