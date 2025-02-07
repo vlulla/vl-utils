@@ -163,15 +163,17 @@ def genrandstr(n: int = 5, lowercase=False) -> str:
   chars = string.ascii_lowercase + ('' if lowercase else string.ascii_uppercase)
   return ''.join(random.choice(chars) for _ in range(abs(n)))
 
-def print_source(obj) -> None:
-  """ interesting function to find out how stuff is defined in python. check out print_source(print_source) ! """
-  import inspect
-  try:
+def get_source(obj) -> str:
+  """ interesting function to find out how stuff is defined in python. check out print_source(get_source) ! """
+  def _get_src(o) -> str:
+    import inspect
+    try:
       src = inspect.getsource(obj)
-  except TypeError as e:
+    except TypeError as e:
       src = f"src {str(obj)} of built-in module, class, or function unavailable"
       print(f"{e}",file=sys.stderr)
-  print(src)
+    return src
+  return _get_src(obj)
 
 def rangealong(l: typing.Iterable) -> typing.Iterable:
   """
@@ -408,5 +410,6 @@ def args(o: object) -> inspect.Signature:
 
 
 ## some aliases ... especially useful in repl
-get_source = get_src = print_src = print_source
+def print_source(o): print(get_source(o))
+print_src, get_src = print_source, get_source
 q=quit
