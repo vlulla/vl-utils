@@ -95,6 +95,19 @@ assert array_length(array_unique([])) = array_length([]);
 assert (select logical_and(array_contains([1,2,3,4,5,6],n)) from unnest(array_unique([1,2,3,1,2,3,4,5,6])) as n) and (array_length(array_unique([1,2,3,1,2,3,4,5,6]))=6);
 assert (select logical_and(array_contains([4,1,3,5,6,2],n)) from unnest(array_unique([1,2,3,1,2,3,4,5,6])) as n);
 
+create or replace temp function array_proportion(arr any type) as (
+ -- similar to R's prop.table or proportions function
+ -- ignores null
+ (
+   with _ as (select a,aidx from unnest(arr) as a with offset aidx where a is not null) -- NOTE (vijay): bq does not allow null in array ... redundant?
+   , _1 as (select a,aidx,a/sum(a) over() as pct from _)
+   select coalesce(array_agg(struct(a,pct) order by aidx),[]) from _1
+ )
+);
+-- TODO (vijay): figure out how to check these... i.e., how to compare structs...
+-- assert are_arrays_equal(array_proportion([]),[]);
+-- assert are_arrays_equal(array_proportion([4,4,4,4]),[(4,0.25),(4,0.25),(4,0.25),(4,0.25)]);
+-- assert are_arrays_equal(array_proportion([0.04514891774626828,0.4126947136518826,0.7758699677504728]),[(0.04514891774626828,0.03659594720964834),(0.4126947136518826,0.3345141967606421),(0.7758699677504728,0.6288898560297096)]);
 
 
 -- some debugging related ideas...from the BQ book!

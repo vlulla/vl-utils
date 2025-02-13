@@ -230,9 +230,18 @@ try:
     return client.query(qry, job_config=job_config).to_dataframe()
   def gcp_to_polars(qry: str, params:typing.List[BQParam]=[], PROJECT:str='') -> pl.DataFrame:
     ## NOTE (vijay): This does not work with Interval/Duration types! I get the error "The datatype tin (for IntervalUnit::MonthDayNanon) is still not supported in Rust implementation....see https://arrow.apache.org/rust/src/arrow_schema/ffi.rs.html
-    df = gcp_to_df(qry,params,PROJECT)
-    dfp = pl.from_arrow(pa.Table.from_pandas(df)) ## NOTE (vijay): need this because pl.from_pandas(df) cannot read db_dtypes.dbdate datatype!
-    return dfp
+    assert PROJECT != '', f"Cannot have empty PROJECT"
+    if len(params) > 0:
+      params_in_qry = [p[1:] for p in re.findall(r"(@[a-zA-Z][a-zA-Z0-9]*)", qry)]
+      params_names = [p.name for p in params]
+      assert (set(params_names) & set(params_in_qry)) == set(params_in_qry), f"Params in query missing from the params arg: {set(params_in_qry) - set(params_names)}"
+    job_config = bq.QueryJobConfig(query_parameters = params)
+    client = bq.Client(project=PROJECT)
+    ## df = gcp_to_df(qry,params,PROJECT)
+    ## dfp = pl.from_arrow(pa.Table.from_pandas(df)) ## NOTE (vijay): need this because pl.from_pandas(df) cannot read db_dtypes.dbdate datatype!
+    ## return dfp
+    df = pl.from_arrow(client.query(qry, job_config=job_config).to_arrow())
+    return df
 except NameError as e:
   print(f"ERROR: {e}",file=sys.stderr)
 
