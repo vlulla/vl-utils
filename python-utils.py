@@ -114,6 +114,19 @@ def softmax(xs,base=math.exp(1)):
   assert all(isnumeric(x) for x in xs)
   exps = type(xs)(base**x for x in xs)       ## does not work with np.ndarray! Use softmax(np.random.standard_normal(15).tolist())
   return type(xs)(e/sum(exps) for e in exps)
+def prop(xs: typing.Iterable) -> typing.Iterable:
+  """
+  Emulate R's prop.table or proportions function.
+
+  >>> prop([1,1,1,1]) # [0.25,0.25,0.25,0.25]
+  >>> prop([1,2,1,1]) # [0.2,0.4,0.2,0.2]
+  >>> prop((1,2,3,4)) # (0.1,0.2,0.3,0.4)
+  >>> prop([]) # []
+  >>> prop(np.arange(1,5)) ## TypeError!
+  >>> prop(np.arange(1,5).tolist()) # :-(
+  """
+  assert isiterable(xs), "Not an iterable"
+  return type(xs)(x/sum(xs) for x in xs)
 
 # Some text related funcs
 def squote(x): return f"'{x}'"
