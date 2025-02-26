@@ -430,6 +430,38 @@ def args(o: object) -> inspect.Signature:
     sig = None
   return sig
 
+def splitarray(xs: typing.Iterable[T], stride:int) -> typing.Iterable[T]:
+  """
+  Generates ragged array by splitting iterable into chunks where majority of the elements are of length stride.
+
+  Emulates K's excellent idiom: `0N 3#!10`
+  >>> l10 = list(range(10))
+  >>> l9 = l10[:9]
+  >>> s = "abcdefghij"
+  >>> splitarray(l10,3) # [[0,1,2],[3,4,5],[6,7,8],[9]]
+  >>> splitarray(tuple(l9),3) # ((0,1,2),(3,4,5),(6,7,8))
+  >>> splitarray(s,3) # ['abc','def','ghi','j']
+  >>> splitarray(s[:9],3) # ['abc','def','ghi']
+  >>> splitarray([],15) # ought to handle strange cases correctly...
+  >>> splitarray("abc",5) # ["abc"]
+  >>> splitarray("abc",1) # ["a","b","c"]
+  >>> splitarray(tuple(l9),2) ((0,1),(2,3),(4,5),(6,7),(8,))
+  """
+  if xs=='': return ['']
+  assert stride > 0, "Cannot have -ve stride!"
+  idxs = [(stride*_,(stride*_)+stride) for _ in range(len(xs)//stride)] + ([(stride*(len(xs)//stride),None)] if len(xs)%stride!=0 else [])
+  if type(xs) == str:
+    ret =          [type(xs)(xs[_[0]:_[-1]]) for _ in idxs]
+  else:
+    ret = type(xs)([type(xs)(xs[_[0]:_[-1]]) for _ in idxs])
+  return ret
+
+## @hy.given(st.lists(st.integers()|st.floats())|st.text(),st.integers(min_value=1))
+## def test_splitarray(xs,n):
+##   ## print(f"(xs,n) => {xs,n}") ## To see that hypothesis is actually running this test!
+##   assert xs == functools.reduce(lambda a,b: a+b, splitarray(xs,n),type(xs)())
+
+
 
 ## some aliases ... especially useful in repl
 def print_source(o): print(get_source(o))
