@@ -124,9 +124,18 @@ def prop(xs: typing.Iterable) -> typing.Iterable:
   >>> prop([]) # []
   >>> prop(np.arange(1,5)) ## TypeError!
   >>> prop(np.arange(1,5).tolist()) # :-(
+  >>> prop(freq(df1.select(pl.col("col1")).to_series()))
+  >>> prop({"a":1,"b":1,"c":1,"d":1})
+  >>> prop({"a":1,"b":1,"c":1,"d":1,"e":"tst"}) ## will raise assertion error!
   """
   assert isiterable(xs), "Not an iterable"
-  return type(xs)(x/sum(xs) for x in xs)
+  if isinstance(xs,dict):
+    assert all(isinstance(v,(int,float,complex)) for _,v in xs.items()),"Non numeric values"
+    sv=sum(xs.values())
+    ret=({k:v/sv for k,v in xs.items()})
+  else:
+    ret = type(xs)(x/sum(xs) for x in xs)
+  return ret
 
 # Some text related funcs
 def squote(x): return f"'{x}'"
