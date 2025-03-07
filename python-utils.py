@@ -470,6 +470,15 @@ def splitarray(xs: typing.Iterable[T], stride:int) -> typing.Iterable[T]:
 ##   ## print(f"(xs,n) => {xs,n}") ## To see that hypothesis is actually running this test!
 ##   assert xs == functools.reduce(lambda a,b: a+b, splitarray(xs,n),type(xs)())
 
+def idir():
+  """
+  dir alternative for IPython.
+  Since IPython caches input/output history in hidden variables, dir() creates a lot of noise. This function reduces this noise.
+  Type ? in the IPython prompt to learn about IPython's history/caching mechanism.
+  """
+  spls = ('_','__','___','_i','_ii','_iii','_ih','_oh','_dh')
+  return [_ for _ in globals() if not _ in spls and not re.match('^_[io]?[0-9]+$',_)]
+
 
 
 ## some aliases ... especially useful in repl
