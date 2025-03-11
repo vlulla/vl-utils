@@ -227,7 +227,7 @@ try:
     if len(frames) == 0:
       print("No pl.DataFrame found in globals().", file=sys.stderr)
       return None
-    result = pl.DataFrame([(n, *d.shape, d.columns) for n,d in frames],schema=["dataframe","nrow","ncol","columns"], orient="row")
+    result = pl.DataFrame([(n, *d.shape, d.columns,round(d.estimated_size(unit="mb"),2)) for n,d in frames],schema=["dataframe","nrow","ncol","columns","size (mb)"], orient="row")
     return result
 except NameError as e:
   print(f"ERROR: {e}",file=sys.stderr)
