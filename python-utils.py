@@ -355,7 +355,7 @@ def grid(axis="both"):
   plt.grid(which="major", ls="-", alpha=3/4, axis=axis)
   plt.grid(which="minor", ls=":", alpha=1/2, axis=axis)
 
-def grep(regex: str, lst: typing.List[str], invert=False) -> typing.List[str]:
+def grep(regex: str, lst: typing.List[str], invert=False, ignorecase=True) -> typing.List[str]:
   """
   Like R's grep function...
   >>> grep("_spend", ['abc', 'xyz_spend', 'abc_spend_xyz'])
@@ -367,7 +367,10 @@ def grep(regex: str, lst: typing.List[str], invert=False) -> typing.List[str]:
   assert isinstance(regex, str)
   assert isinstance(lst, list)
   assert all(isinstance(o, str) for o in lst)
-  regexc = re.compile(regex, re.IGNORECASE | re.UNICODE | re.VERBOSE)
+  assert all(isinstance(o, bool) for o in (invert, ignorecase))
+  flags = re.UNICODE | re.VERBOSE
+  if ignorecase: flags |= re.IGNORECASE
+  regexc = re.compile(regex, flags)
   if invert: return [c for c in lst if re.search(regexc, c) is None]
   return [c for c in lst if re.search(regexc, c) is not None]
 
