@@ -233,7 +233,7 @@ except NameError as e:
   print(f"ERROR: {e}",file=sys.stderr)
 
 try:
-  BQParam = typing.Union[bq.ScalarQueryParameter, bq.ArrayQueryParameter, bq.StructQueryParameter]
+  BQParam = typing.Union[bq.ScalarQueryParameter, bq.ArrayQueryParameter, bq.StructQueryParameter, bq.RangeQueryParameter]
   def gcp_to_df(qry: str, params:typing.List[BQParam] = [], PROJECT:str = '') -> pd.DataFrame:
     """Example usage:
     df = gcp_to_df(qry="select * from `bigquery-public-data.idc_v17.dicom_all` where StudyDate=@dt",params=[bq.ScalarQueryParameter("dt","DATE",datetime.date(2010,1,1))],PROJECT="<your-project>")
@@ -244,7 +244,7 @@ try:
     ##   https://github.com/googleapis/python-bigquery/blob/main/samples/client_query_w_struct_params.py
     assert PROJECT != '', f"Cannot have empty PROJECT"
     if len(params) > 0:
-      params_in_qry = [p[1:] for p in re.findall(r"(@[a-zA-Z][a-zA-Z0-9]*)", qry)]
+      params_in_qry = [p[1:] for p in re.findall(r"(@[a-zA-Z][a-zA-Z0-9_]*)", qry)]
       params_names = [p.name for p in params]
       assert (set(params_names) & set(params_in_qry)) == set(params_in_qry), f"Params in query missing from the params arg: {set(params_in_qry) - set(params_names)}"
     job_config = bq.QueryJobConfig(query_parameters = params)
@@ -254,7 +254,7 @@ try:
     ## NOTE (vijay): This does not work with Interval/Duration types! I get the error "The datatype tin (for IntervalUnit::MonthDayNanon) is still not supported in Rust implementation....see https://arrow.apache.org/rust/src/arrow_schema/ffi.rs.html
     assert PROJECT != '', f"Cannot have empty PROJECT"
     if len(params) > 0:
-      params_in_qry = [p[1:] for p in re.findall(r"(@[a-zA-Z][a-zA-Z0-9]*)", qry)]
+      params_in_qry = [p[1:] for p in re.findall(r"(@[a-zA-Z][a-zA-Z0-9_]*)", qry)]
       params_names = [p.name for p in params]
       assert (set(params_names) & set(params_in_qry)) == set(params_in_qry), f"Params in query missing from the params arg: {set(params_in_qry) - set(params_names)}"
     job_config = bq.QueryJobConfig(query_parameters = params)
