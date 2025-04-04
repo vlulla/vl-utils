@@ -182,7 +182,7 @@ def genrandstr(n: int = 5, lowercase=False) -> str:
   ## idx = [random.randint(0,len(chars)) for _ in range(n)]
   ## return ''.join(chars[i%len(chars)] for i in idx)
   import string,random
-  chars = string.ascii_lowercase + ('' if lowercase else string.ascii_uppercase)
+  chars = string.ascii_lowercase + ('' if lowercase else string.ascii_uppercase) + string.digits
   return ''.join(random.choice(chars) for _ in range(abs(n)))
 
 def get_source(obj) -> str:
