@@ -47,7 +47,7 @@ create or replace macro array_prop(d) as (with _ as (select list_reduce(list_fil
 create or replace macro randomstr(len) as (
   with _ as (select 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' as alpha,'0123456789' as num)
     , _1 as (select *,alpha||num as alnum,length(alpha) as alen,length(num) as nlen from _)
-    , _2 as (select alnum,cast(random()*alen as int) as fst, apply(range(2,len+1),x->cast(random()*(alen+nlen) as int)) as rest from _1)
+    , _2 as (select alnum,cast(random()*alen as int) as fst, apply(range(1,len),x->cast(random()*(alen+nlen) as int)) as rest from _1)
   select list_reduce(apply([fst]||rest,i->alnum[i]),(l,r)->l||r) as str from _2
 );
 -- select randomstr(cast(100*random() as int));
