@@ -355,7 +355,8 @@ def grid(axis="both"):
   plt.grid(which="major", ls="-", alpha=3/4, axis=axis)
   plt.grid(which="minor", ls=":", alpha=1/2, axis=axis)
 
-def grep(regex: str, lst: typing.List[str], invert=False, ignorecase=True) -> typing.List[str]:
+
+def grep[L: list[str] | set[str] | tuple[str]](regex: str, lst: L, invert=False, ignorecase=True) -> L:
   """
   Like R's grep function...
   >>> grep("_spend", ['abc', 'xyz_spend', 'abc_spend_xyz'])
@@ -363,18 +364,23 @@ def grep(regex: str, lst: typing.List[str], invert=False, ignorecase=True) -> ty
   >>> grep("_spned", ['abc', 'xyz_spend', 'abc_spend_xyz']) ## typo in regex
   >>> grep("_spend$", df.columns.tolist()) ## extract spend cols
   >>> grep("_spend$", df.columns.tolist(), invert=True) ## everything except spend cols
+  >>> grep("_spend$",('abc','xyz_spend','abc_spend_xyz'))
+  >>> grep("_spend",{'abc','xyz_spend','abc_spend_xyz'))
+
+  Does not work with dicts!
   """
   assert isinstance(regex, str)
-  assert isinstance(lst, list)
+  ## assert isinstance(lst, list)
+  assert isiterable(lst)
   assert all(isinstance(o, str) for o in lst)
   assert all(isinstance(o, bool) for o in (invert, ignorecase))
   flags = re.UNICODE | re.VERBOSE
   if ignorecase: flags |= re.IGNORECASE
   regexc = re.compile(regex, flags)
-  if invert: return [c for c in lst if re.search(regexc, c) is None]
-  return [c for c in lst if re.search(regexc, c) is not None]
+  if invert: return type(lst)([c for c in lst if re.search(regexc, c) is None])
+  return type(lst)([c for c in lst if re.search(regexc, c) is not None])
 
-def gsub(regex: str, repl: str, lst: typing.Union[str, typing.List[str]]) -> typing.List[str]:
+def gsub[L: list[str] | set[str] | tuple[str]](regex: str, repl: str, lst: str | L) -> str | L:
   """
   Like R's gsub function...
   >>> gsub("_spend$", "", df.columns.tolist())
@@ -382,15 +388,16 @@ def gsub(regex: str, repl: str, lst: typing.Union[str, typing.List[str]]) -> typ
   """
   assert isinstance(regex, str)
   assert isinstance(repl, str)
-  assert isinstance(lst, (str, list))
-  if isinstance(lst, list): assert all(isinstance(i, str) for i in lst)
+  ## assert isinstance(lst, (str, list))
+  assert isiterable(lst)
+  if isinstance(lst, (list,set,tuple)): assert all(isinstance(i, str) for i in lst)
 
   @functools.cache
   def _gsub(_regex: str, _repl: str, _string: str) -> str:
     regexc = re.compile(_regex, re.IGNORECASE | re.UNICODE | re.VERBOSE)
     return re.sub(regexc, _repl, _string)
   if type(lst) == type(''): return _gsub(regex, repl, lst)
-  return [_gsub(regex, repl, c) for c in lst]
+  return type(lst)([_gsub(regex, repl, c) for c in lst])
 
 P = typing.ParamSpec('P')
 def negate(pred: collections.abc.Callable[P, bool]) -> collections.abc.Callable[P, bool]:
