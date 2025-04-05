@@ -377,8 +377,8 @@ def grep[L: list[str] | set[str] | tuple[str]](regex: str, lst: L, invert=False,
   flags = re.UNICODE | re.VERBOSE
   if ignorecase: flags |= re.IGNORECASE
   regexc = re.compile(regex, flags)
-  if invert: return type(lst)([c for c in lst if re.search(regexc, c) is None])
-  return type(lst)([c for c in lst if re.search(regexc, c) is not None])
+  if invert: return type(lst)(c for c in lst if re.search(regexc, c) is None)
+  return type(lst)(c for c in lst if re.search(regexc, c) is not None)
 
 def gsub[L: list[str] | set[str] | tuple[str]](regex: str, repl: str, lst: str | L) -> str | L:
   """
@@ -397,7 +397,7 @@ def gsub[L: list[str] | set[str] | tuple[str]](regex: str, repl: str, lst: str |
     regexc = re.compile(_regex, re.IGNORECASE | re.UNICODE | re.VERBOSE)
     return re.sub(regexc, _repl, _string)
   if type(lst) == type(''): return _gsub(regex, repl, lst)
-  return type(lst)([_gsub(regex, repl, c) for c in lst])
+  return type(lst)(_gsub(regex, repl, c) for c in lst)
 
 P = typing.ParamSpec('P')
 def negate(pred: collections.abc.Callable[P, bool]) -> collections.abc.Callable[P, bool]:
