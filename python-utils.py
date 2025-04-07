@@ -74,22 +74,22 @@ def test_colname_fixer(s: str):
 ##def isiterable(x): return isinstance(x, (list, set, tuple, str, np.ndarray, range, pd.Series, pd.DataFrame))
 def isiterable(x): return '__iter__' in dir(x)
 def isnumeric(x): return isinstance(x, (int, float, complex)) ## TODO (vijay): might need to include decimal.Decimal
-def avg(xs: typing.Iterable) -> float:
+def avg(xs: collections.abc.Iterable) -> float:
   assert isiterable(xs), "Not an iterable"
   assert all(isnumeric(x) for x in xs), "Non numeric value found"
   return sum(xs)/len(xs)
 mean = average = avg
-def nrange(xs: typing.Iterable) -> typing.Tuple: # mnemonic: numeric range?
+def nrange(xs: collections.abc.Iterable) -> typing.Tuple: # mnemonic: numeric range?
   assert isiterable(xs)
   assert all(isnumeric(x) for x in xs), "Non numeric value found"
   return min(xs),max(xs)
-def cumsum(xs: typing.Iterable) -> typing.Iterable:
+def cumsum(xs: collections.abc.Iterable) -> collections.abc.Iterable:
   assert isiterable(xs)
   assert all(isnumeric(x) for x in xs), "Non numeric value found"
   s=[sum(xs[:i+1]) for i in range(len(xs))]
   assert sum(xs) == s[-1]
   return type(xs)(s) ## does not work with np.ndarrays! Use cumsum(list(ndarr)) instead
-def freq(xs: typing.Iterable) -> collections.Counter:
+def freq(xs: collections.abc.Iterable) -> collections.Counter:
   """
   >>> freq('mississippi') # similar to pandas.value_counts
   >>> freq(repeat((1,2,3),2))
@@ -114,7 +114,7 @@ def softmax(xs,base=math.exp(1)):
   assert all(isnumeric(x) for x in xs)
   exps = type(xs)(base**x for x in xs)       ## does not work with np.ndarray! Use softmax(np.random.standard_normal(15).tolist())
   return type(xs)(e/sum(exps) for e in exps)
-def prop(xs: typing.Iterable) -> typing.Iterable:
+def prop(xs: collections.abc.Iterable) -> collections.abc.Iterable:
   """
   Emulate R's prop.table or proportions function.
 
@@ -141,7 +141,7 @@ def prop(xs: typing.Iterable) -> typing.Iterable:
 def squote(x): return f"'{x}'"
 def dquote(x): return f'"{x}"'
 singlequote,doublequote=squote,dquote
-def abbrev(xs: typing.Iterable, n: int = 3) -> typing.Iterable:
+def abbrev(xs: collections.abc.Iterable, n: int = 3) -> collections.abc.Iterable:
   """
   >>> abbrev('vijay',3) # 'vij'
   >>> abbrev([[1,2,3,4],[1,2,3],'vijay',(1,2,3,4)],3) # [[1,2,3],[1,2,3],'vij',(1,2,3)]
@@ -197,7 +197,7 @@ def get_source(obj) -> str:
     return src
   return _get_src(obj)
 
-def rangealong(l: typing.Iterable) -> typing.Iterable:
+def rangealong(l: collections.abc.Iterable) -> collections.abc.Iterable:
   """
   Like R's seq_along! But works differently for pd.DataFrame!
   >>> rangealong(pd.DataFrame({'a':range(10),'b':[i*10 for i in range(10)]})) ## range(0,10)
@@ -451,7 +451,7 @@ def args(o: object) -> inspect.Signature:
     sig = None
   return sig
 
-def splitarray(xs: typing.Iterable[T], stride:int) -> typing.Iterable[T]:
+def splitarray(xs: collections.abc.Iterable[T], stride:int) -> collections.abc.Iterable[T]:
   """
   Generates ragged array by splitting iterable into chunks where majority of the elements are of length stride.
 
