@@ -356,7 +356,7 @@ def grid(axis="both"):
   plt.grid(which="minor", ls=":", alpha=1/2, axis=axis)
 
 
-def grep[L: list[str] | set[str] | tuple[str]](regex: str, lst: L, invert=False, ignorecase=True) -> L:
+def grep[L: collections.abc.Iterable[T]](regex: str, lst: L, invert=False, ignorecase=True) -> L:
   """
   Like R's grep function...
   >>> grep("_spend", ['abc', 'xyz_spend', 'abc_spend_xyz'])
@@ -367,7 +367,8 @@ def grep[L: list[str] | set[str] | tuple[str]](regex: str, lst: L, invert=False,
   >>> grep("_spend$",('abc','xyz_spend','abc_spend_xyz'))
   >>> grep("_spend",{'abc','xyz_spend','abc_spend_xyz'))
 
-  Does not work with dicts!
+  For dict/colletions.Counter, the function filters based on key and tries to return the appropriate type.
+  TODO: Ensure that this works correctly for dict like types.
   """
   assert isinstance(regex, str)
   ## assert isinstance(lst, list)
@@ -378,6 +379,7 @@ def grep[L: list[str] | set[str] | tuple[str]](regex: str, lst: L, invert=False,
   if ignorecase: flags |= re.IGNORECASE
   regexc = re.compile(regex, flags)
   if invert: return type(lst)(c for c in lst if re.search(regexc, c) is None)
+  if isinstance(lst,(dict,collections.Counter)): return type(lst)({k:v for k,v in lst.items() if re.search(regexc,k) is None})
   return type(lst)(c for c in lst if re.search(regexc, c) is not None)
 
 def gsub[L: list[str] | set[str] | tuple[str]](regex: str, repl: str, lst: str | L) -> str | L:
