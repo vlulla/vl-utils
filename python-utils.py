@@ -491,6 +491,17 @@ def idir():
   spls = ('_','__','___','_i','_ii','_iii','_ih','_oh','_dh')
   return [_ for _ in globals() if not _ in spls and not re.match('^_[io]?[0-9]+$',_)]
 
+def monthnames():
+  """
+  Trying to emulate R's month.name and month.abb constants
+  >>> monthnames()
+  >>> abbrev(monthnames())
+  >>> pl.DataFrame({"month":monthnames(),"abbr":abbrev(monthnames())})
+  """
+  return 'January','February','March','April','May','June','July','August','September','October','November','December'
+def daynames(): return 'Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'
+def monthdays(isleapyear=False): return 31,28+isleapyear,31,30,31,30,31,31,30,31,30,31
+
 
 
 ## some aliases ... especially useful in repl
