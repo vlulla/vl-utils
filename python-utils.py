@@ -502,6 +502,9 @@ def monthnames():
 def daynames(): return 'Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'
 def monthdays(isleapyear=False): return 31,28+isleapyear,31,30,31,30,31,31,30,31,30,31
 
+def togglesqlcomment(s):
+  if not s: return s ## s=="" or s==None
+  return s[3:] if s[:3] == '-- ' else f"-- {s}"
 
 
 ## some aliases ... especially useful in repl
