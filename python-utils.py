@@ -503,6 +503,7 @@ def daynames(): return 'Sunday','Monday','Tuesday','Wednesday','Thursday','Frida
 def monthdays(isleapyear=False): return 31,28+isleapyear,31,30,31,30,31,31,30,31,30,31
 
 def togglesqlcomment(s):
+  assert isinstance(s,(type(""),)), "Need a str"
   if not s: return s ## s=="" or s==None
   return s[3:] if s[:3] == '-- ' else f"-- {s}"
 
