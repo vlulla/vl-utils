@@ -1,4 +1,4 @@
-import re, typing, inspect, collections, random, sys, dataclasses as dc,math
+import re, typing, inspect, collections, random, sys, dataclasses as dc,math,statistics as stats
 import numpy as np, pandas as pd
 import functools,operator
 try: import hypothesis as hy, hypothesis.strategies as st
@@ -74,11 +74,11 @@ def test_colname_fixer(s: str):
 ##def isiterable(x): return isinstance(x, (list, set, tuple, str, np.ndarray, range, pd.Series, pd.DataFrame))
 def isiterable(x): return '__iter__' in dir(x)
 def isnumeric(x): return isinstance(x, (int, float, complex)) ## TODO (vijay): might need to include decimal.Decimal
-def avg(xs: collections.abc.Iterable) -> float:
-  assert isiterable(xs), "Not an iterable"
-  assert all(isnumeric(x) for x in xs), "Non numeric value found"
-  return sum(xs)/len(xs)
-mean = average = avg
+## def avg(xs: collections.abc.Iterable) -> float:
+##   assert isiterable(xs), "Not an iterable"
+##   assert all(isnumeric(x) for x in xs), "Non numeric value found"
+##   return sum(xs)/len(xs)
+mean = average = avg = stats.mean
 def nrange(xs: collections.abc.Iterable) -> typing.Tuple: # mnemonic: numeric range?
   assert isiterable(xs)
   assert all(isnumeric(x) for x in xs), "Non numeric value found"
