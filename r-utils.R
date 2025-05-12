@@ -653,3 +653,32 @@ getAllObjects <- function() {
   }
   rbindlist(lapply(envs,getObjects))
 }
+
+binned_mean <- function(x) {
+  ## Based on the great idea from https://www.pymc-labs.com/blog-posts/bayesian-inference-at-scale-running-ab-tests-with-millions-of-observations/
+  ## R> y <- rnorm(10e6, mean=100L, sd=20L)
+  ## R> yhist <- hist(y, breaks=20e3)
+  ## R> mean(y); sd(y)
+  ## R> binned_mean(y); binned_sd(y) ## ought to be similar
+  ## R> ## biggest benefit is the size of these vectors! This ought to enable doing bigger statistical tests...
+  ## R> as.numeric(object.size(yhist))/as.numeric(object.size(y))
+  stopifnot(class(x)=="histogram")
+  n <- sum(x$counts)
+  mu <- sum(x$mids * x$counts)/n
+  mu
+}
+
+binned_sd <- function(x) {
+  ## Based on the great idea from https://www.pymc-labs.com/blog-posts/bayesian-inference-at-scale-running-ab-tests-with-millions-of-observations/
+  ## R> y <- rnorm(10e6, mean=100L, sd=20L)
+  ## R> yhist <- hist(y, breaks=20e3)
+  ## R> mean(y); sd(y)
+  ## R> binned_mean(y); binned_sd(y) ## ought to be similar
+  ## R> ## biggest benefit is the size of these vectors! This ought to enable doing bigger statistical tests...
+  ## R> as.numeric(object.size(yhist))/as.numeric(object.size(y))
+  stopifnot(class(x)=="histogram")
+  n <- sum(x$counts)
+  mu <- sum(x$mids * x$counts)/n
+  binvar <- (sum(x$mids^2 * x$counts) - n*mu^2)/(n-1)
+  sqrt(binvar)
+}
