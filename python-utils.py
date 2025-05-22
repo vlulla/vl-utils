@@ -519,4 +519,4 @@ def togglesqlcomment(s):
 ## some aliases ... especially useful in repl
 def print_source(o): print(get_source(o))
 print_src, get_src = print_source, get_source
-q=quit
+## q=quit
