@@ -41,16 +41,16 @@ create or replace macro money_to_numeric(d) as ( select replace(replace(replace(
 -- with _ as (select unnest(['-$1,234.10','$1,234.10','($1,234.10)','($0.99999)', '   $0.3333333333333333', '    ($0.3333333333333333)     ', '$0.0', '($6.080089694185882e-110)','($4.080089694185882e-10)     ']) as m) select m,printf('"%s"',m) as "m with quotes",money_to_numeric(m) as mm from _;
 
 -- Proportions in the array...maintains nulls!
-create or replace macro array_prop(d) as (with _ as (select list_reduce(list_filter(d,_->_ is not null),(a,b)->a+b) as dsum) select list_transform(d,x->x/dsum) from _);
+create or replace macro array_prop(d) as (with _ as (select list_reduce(list_filter(d,lambda _:_ is not null),lambda a,b:a+b) as dsum) select list_transform(d,x->x/dsum) from _);
 
 -- random str of length len
 create or replace macro randomstr(len) as (
   -- with _ as (select 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' as alpha,'0123456789' as num)
   --   , _1 as (select *,alpha||num as alnum,length(alpha) as alen,length(num) as nlen from _)
-  -- --   , _2 as (select alnum,cast(trunc(random()*alen) as int) as fst, apply(range(1,len),x->cast(trunc(random()*(alen+nlen))+1 as int)) as rest from _1)
-  -- -- select list_reduce(apply([fst]||rest,i->alnum[i]),(l,r)->l||r) as str from _2
-  -- , _2 as (select alnum,apply(range(len),x->cast(trunc(random()*(alen+nlen))+1 as int)) as idx from _1)
-  -- select case when length(idx)=0 then '' else list_reduce(apply(idx,i->alnum[i]),(l,r)->l||r) end as str from _2
+  -- --   , _2 as (select alnum,cast(trunc(random()*alen) as int) as fst, apply(range(1,len),lambda x:cast(trunc(random()*(alen+nlen))+1 as int)) as rest from _1)
+  -- -- select list_reduce(apply([fst]||rest,lambda i:alnum[i]),lambda l,r:l||r) as str from _2
+  -- , _2 as (select alnum,apply(range(len),lambda x:cast(trunc(random()*(alen+nlen))+1 as int)) as idx from _1)
+  -- select case when length(idx)=0 then '' else list_reduce(apply(idx,lambda i:alnum[i]),lambda l,r:l||r) end as str from _2
   select string_agg(alnum[idx],'') as randstr from (
     select 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' as alnum,cast(trunc(random()*length(alnum))+1 as int) as idx from range(len)
   )
