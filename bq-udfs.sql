@@ -41,6 +41,12 @@ assert mod(yyyy_woy(current_date()),100) between 0 and 53;
 create or replace function yyyy_doy(x any type) as (cast(format_date('%Y%j', cast(x as date)) as int64) );
 assert mod(yyyy_doy(current_date()),1000) between 1 and 366;
 
+create or replace function datediff_businessdays(d1 date, d2 date) returns int as (
+  -- This ought to reconcile with pd.bdate_range!
+  (with _ as (select dt from unnest(generate_date_array(d1,d2,interval 1 day)) as dt)select sum(cast(extract(dayofweek from dt) in (2,3,4,5,6) as int)) from _)
+);
+
+
 -- NOTE (vijay): BQ does not allow creating this without project/dataset_id info. So, if you wish to create this in a temporary session follow this:
 -- 1. Open a new tab in BQ console and enable "Session Mode".
 -- 2. create temporary table tst(x int);
