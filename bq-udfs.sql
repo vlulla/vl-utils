@@ -42,9 +42,16 @@ create or replace function yyyy_doy(x any type) as (cast(format_date('%Y%j', cas
 assert mod(yyyy_doy(current_date()),1000) between 1 and 366;
 
 create or replace function datediff_businessdays(d1 date, d2 date) returns int as (
-  -- This ought to reconcile with pd.bdate_range!
-  (with _ as (select dt from unnest(generate_date_array(d1,d2,interval 1 day)) as dt)select sum(cast(extract(dayofweek from dt) in (2,3,4,5,6) as int)) from _)
+  -- This ought to reconcile with pd.bdate_range...but more flexible in that date arguments can be in any order...i.e., d1 does not have to be less than d2!
+  (with _ as (select dt from unnest(generate_date_array(d1,d2,interval if(d2<d1,-1,1)*1 day)) as dt)select sum(cast(extract(dayofweek from dt) in (2,3,4,5,6) as int)) from _)
 );
+assert datediff_businessdays('2025-05-30','2026-04-19')=231;
+assert datediff_businessdays('2025-05-31','2026-01-15')=164;
+assert datediff_businessdays('2025-06-01','2025-10-28')=107;
+assert datediff_businessdays('2025-06-02','2026-01-30')=175;
+assert datediff_businessdays('2025-06-03','2026-09-02')=327;
+assert datediff_businessdays('2025-06-04','2025-07-28')=39;
+assert datediff_businessdays('2025-06-05','2024-10-08')=173;
 
 
 -- NOTE (vijay): BQ does not allow creating this without project/dataset_id info. So, if you wish to create this in a temporary session follow this:
