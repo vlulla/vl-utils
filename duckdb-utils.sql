@@ -7,7 +7,7 @@
 create or replace macro yearqtr(x) as (select (year(x::date)*10)+quarter(x::date));
 
 -- select * from calendar_between_dates('2024-06-15','2025-02-13'); -- calendar dates between custom dates!!
-create or replace macro calendar_between_dates(start_date,end_date) as table (with _ as (select unnest(generate_series(start_date::date,end_date::date,interval 1 day)::date[])::date as dt) select dt,strftime(dt,'%a') as dow, yearqtr(dt) as YYYYQ, yearweek(dt) as ISOYYYYWK,isodow(dt) as ISODOW,dayofweek(dt) as dow_num from _);
+create or replace macro calendar_between_dates(start_date,end_date) as table (with _ as (select unnest(generate_series(start_date::date,end_date::date,interval 1 day)::date[])::date as dt) select dt,strftime(dt,'%a') as dow, year(dt) as YYYY, month(dt) as M, dayofmonth(dt) DOM, weekofyear(dt) as WOY, yearweek(dt) as ISOYYYYWK,isodow(dt) as ISODOW,dayofweek(dt) as dow_num,quarter(dt) as Q, YYYY||''||Q as YYYYQ from _);
 
 -- select * from calendar_year(2024);
 create or replace macro calendar_year(yr) as TABLE (select * from calendar_between_dates(yr||'-01-01', yr||'-12-31'));
