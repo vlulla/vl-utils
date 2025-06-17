@@ -63,6 +63,9 @@ assert datediff_businessdays('2025-06-05','2024-10-08')=173;
 --    4b. Annoyingly, i cannot call this TVF (table-valued function) without the complete path!
 create or replace table function calendar_year(yr any type) as (with _ as (select cast(dt as date) as dt from unnest(generate_date_array(cast(yr||'-01-01' as date),cast(yr||'-12-31' as date),interval 1 day)) as dt) select dt,format_date('%a',dt) as dow,cast(format_date('%Y%Q',dt) as int) as yyyyqtr from _);
 
+create or replace table function dateaxis(startdate date, enddate date) as (with _ as (select dt as `date`, date_trunc(dt, week) as date_trunc_week, date_trunc(dt, month) as date_trunc_month, date_trunc(dt, year) as date_trunc_year from unnest(generate_date_array(startdate, enddate, interval 1 day)) as dt) select * from _);
+create or replace temporary table function dateaxisforyear(yr any type) as (select dt as `date`, date_trunc(dt, week) as date_trunc_week, date_trunc(dt, month) as date_trunc_month, date_trunc(dt, year) as date_trunc_year from unnest(generate_date_array(cast(yr||'-01-01' as date), cast(yr||'-12-31' as date), interval 1 day)) as dt);
+
 
 create or replace function lastarrayelement(arr any type) as ( arr[safe_ordinal(array_length(arr))]);
 -- select lastarrayelement(a) from (select [1,2,3,4] as a union all select [] union all select [1]) s;
