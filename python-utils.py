@@ -394,6 +394,31 @@ def grep[L: collections.abc.Iterable[T]](regex: str, lst: L, invert=False, ignor
   if invert: return type(lst)(c for c in lst if re.search(regexc, c) is     None)
   return            type(lst)(c for c in lst if re.search(regexc, c) is not None)
 
+def grepl[L: typing.Union[list,tuple]](regex: str, lst: L, invert=False, ignorecase=False) -> L:
+  """
+  Like R's grepl function
+  >>> grepl("_spend", ['abc', 'xyz_spend', 'abc_spend_xyz'])
+  >>> grepl("_spend", ('abc', 'xyz_spend', 'abc_spend_xyz'))
+  >>> grepl("_spend$", ['abc', 'xyz_spend', 'abc_spend_xyz'])
+  >>> grepl("_spend$", [])
+  >>> grepl("abc|xyz", ['abc', 'xyz_spend', 'abc_spend_xyz'])
+  >>> grepl("abc|xyz", ['abc', 'xyz_spend', 'abc_spend_xyz'], invert=True)
+  """
+  assert isinstance(regex, str)
+  assert isiterable(lst)
+  assert all(isinstance(o, str) for o in lst)
+  assert all(isinstance(o, bool) for o in (invert, ignorecase))
+  assert isinstance(lst, (list,tuple))
+  flags = re.UNICODE | re.VERBOSE
+  if ignorecase: flags |= re.IGNORECASE
+  regexc = re.compile(regex, flags)
+  res = type(lst)(re.search(regexc, c) is not None for c in lst)
+  if invert: res = type(res)([not r for r in res])
+  assert len(res) == len(lst)
+  assert all(isinstance(c,bool) for c in res)
+  assert type(lst) == type(res)
+  return res
+
 def gsub[L: list[str] | set[str] | tuple[str]](regex: str, repl: str, lst: str | L) -> str | L:
   """
   Like R's gsub function...
