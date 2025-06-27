@@ -364,7 +364,7 @@ def grid(axis="both"):
   plt.grid(which="minor", ls=":", alpha=1/2, axis=axis)
 
 
-def grep[L: collections.abc.Iterable[T]](regex: str, lst: L, invert=False, ignorecase=True) -> L:
+def grep[L: collections.abc.Iterable[T]](regex: str, lst: L, invert=False, ignorecase=False) -> L:
   """
   Like R's grep function...
   >>> grep("_spend", ['abc', 'xyz_spend', 'abc_spend_xyz'])
@@ -374,6 +374,8 @@ def grep[L: collections.abc.Iterable[T]](regex: str, lst: L, invert=False, ignor
   >>> grep("_spend$", df.columns.tolist(), invert=True) ## everything except spend cols
   >>> grep("_spend$",('abc','xyz_spend','abc_spend_xyz'))
   >>> grep("_spend",{'abc','xyz_spend','abc_spend_xyz'))
+  >>> grep("abc|xyz", ['abc', 'xyz_spend', 'abc_spend_xyz'])
+  >>> grep("abc|xyz", ['abc', 'xyz_spend', 'abc_spend_xyz'], invert=True)
 
   For dict/colletions.Counter, the function filters based on key and tries to return the appropriate type.
   TODO: Ensure that this works correctly for dict like types.
@@ -386,9 +388,11 @@ def grep[L: collections.abc.Iterable[T]](regex: str, lst: L, invert=False, ignor
   flags = re.UNICODE | re.VERBOSE
   if ignorecase: flags |= re.IGNORECASE
   regexc = re.compile(regex, flags)
-  if invert: return type(lst)(c for c in lst if re.search(regexc, c) is None)
-  if isinstance(lst,(dict,collections.Counter)): return type(lst)({k:v for k,v in lst.items() if re.search(regexc,k) is None})
-  return type(lst)(c for c in lst if re.search(regexc, c) is not None)
+  if isinstance(lst,(dict,collections.Counter)):
+    if invert: return type(lst)({k:v for k,v in lst.items() if re.search(regexc,k) is     None})
+    return            type(lst)({k:v for k,v in lst.items() if re.search(regexc,k) is not None})
+  if invert: return type(lst)(c for c in lst if re.search(regexc, c) is     None)
+  return            type(lst)(c for c in lst if re.search(regexc, c) is not None)
 
 def gsub[L: list[str] | set[str] | tuple[str]](regex: str, repl: str, lst: str | L) -> str | L:
   """
