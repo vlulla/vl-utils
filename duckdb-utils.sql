@@ -80,7 +80,7 @@ with
 , christmasdays as (select date,cast((month,day)=(12,25) as int) as is_christmas_day from dates_with_attrs)
 , weekdayfeatures as (select date, cast(dow='Mon' as int) as is_monday, cast(dow='Tue' as int) as is_tuesday, cast(dow='Wed' as int) as is_wednesday, cast(dow='Thu' as int) as is_thursday, cast(dow='Fri' as int) as is_friday, cast(dow='Sat' as int) as is_saturday, cast(dow='Sun' as int) as is_sunday from dates_with_attrs)
 , monthfeatures as (select date,cast(month=1 as int) as is_jan, cast(month=2 as int) as is_feb, cast(month=3 as int) as is_mar, cast(month=4 as int) as is_apr, cast(month=5 as int) as is_may, cast(month=6 as int) as is_jun, cast(month=7 as int) as is_jul, cast(month=8 as int) as is_aug, cast(month=9 as int) as is_sep, cast(month=10 as int) as is_oct, cast(month=11 as int) as is_nov, cast(month=12 as int) as is_dec from dates_with_attrs)
-, weekendfeatures as (select date,cast(1 in (is_monday,is_tuesday,is_wednesday,is_thursday,is_friday) as int) as is_weekday,cast(1 in (is_saturday, is_sunday) as int) as is_weekend from weekdayfeatures)
+, weekendfeatures as (select date,(is_monday|is_tuesday|is_wednesday|is_thursday|is_friday) as is_weekday,(is_saturday|is_sunday) as is_weekend from weekdayfeatures)
 select * from
           -- dates
           dates_with_attrs
