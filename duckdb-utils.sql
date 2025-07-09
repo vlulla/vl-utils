@@ -102,7 +102,7 @@ left join weekdayfeatures  using(date)
 left join monthfeatures    using(date)
 left join weekendfeatures  using(date)
 where 1=1
-and year(date) between 2020 and 2030
+-- and year(date) between 2020 and 2030
 -- and is_newyears_day=1
 -- and is_mlkjr_day=1
 -- and is_valentines_day=1
