@@ -66,6 +66,69 @@ create or replace table function calendar_year(yr any type) as (with _ as (selec
 create or replace table function dateaxis(startdate date, enddate date) as (with _ as (select dt as `date`, date_trunc(dt, week) as date_trunc_week, date_trunc(dt, month) as date_trunc_month, date_trunc(dt, year) as date_trunc_year from unnest(generate_date_array(startdate, enddate, interval 1 day)) as dt) select * from _);
 create or replace temporary table function dateaxisforyear(yr any type) as (select dt as `date`, date_trunc(dt, week) as date_trunc_week, date_trunc(dt, month) as date_trunc_month, date_trunc(dt, year) as date_trunc_year from unnest(generate_date_array(cast(yr||'-01-01' as date), cast(yr||'-12-31' as date), interval 1 day)) as dt);
 
+create or replace temp table function datefeatures(startdate date, enddate date) as (
+  (with
+    dates as (select date from unnest(generate_date_array(cast(startdate as date),cast(enddate as date),interval 1 day)) as date)
+  , dates_with_attrs as (select  date,extract(year from date) as year, extract(month from date) as month, extract(day from date) as day, format_date('%a',date) as dow from dates)
+  , dates_with_attrs_with_ordinals as (select *,row_number() OVER (yearmonweekday order by date) as ordinal_dow from dates_with_attrs window yearmonweekday as (partition by year,month,dow))
+  , newyears as (select date,cast((month,day)=(1,1) as int) as is_newyears_day from dates_with_attrs)
+  , mlkdays as (select date,cast((month,dow,ordinal_dow)=(1,'Mon',3) and year>1982 as int) as is_mlkjr_day from dates_with_attrs_with_ordinals)
+  , valentines as (select date,cast((month,day)=(2,14) as int) as is_valentines_day from dates_with_attrs)
+  , memorialdays as (select date,cast(date in (select max(date) from dates_with_attrs_with_ordinals where (month,dow)=(5,'Mon') group by year) as int) as is_memorial_day from dates)
+  , mothersdays as (select date,cast((month,dow,ordinal_dow)=(5,'Sun',2) as int) as is_mothersday from dates_with_attrs_with_ordinals)
+  , fathersdays as (select date,cast((month,dow,ordinal_dow)=(6,'Sun',3) as int) as is_fathersday from dates_with_attrs_with_ordinals)
+  , juneteenthdays as (select date,cast((month,day)=(6,19) and year>=2021 as int) as is_juneteenth_day from dates_with_attrs)
+  , july4days as (select date,cast((month,day)=(7,4) as int) as is_july4_day from dates_with_attrs)
+  , labordays as (select date,cast((month,dow,ordinal_dow)=(9,'Mon',1) as int) as is_labor_day from dates_with_attrs_with_ordinals)
+  , thanksgivingdays as (select date,cast((month,dow,ordinal_dow)=(11,'Thu',4) as int) as is_thanksgiving_day from dates_with_attrs_with_ordinals)
+  , blackfridays as (select date,cast(date in (select date (date+interval 1 day) from thanksgivingdays where is_thanksgiving_day<>0) as int) as is_blackfriday from dates)
+  , cybermondays as (select date,cast(date in (select date (date+interval 4 day) from thanksgivingdays where is_thanksgiving_day<>0) as int) as is_cybermonday from dates)
+  , christmasdays as (select date,cast((month,day)=(12,25) as int) as is_christmas_day from dates_with_attrs)
+  , weekdayfeatures as (select date, cast(dow='Mon' as int) as is_monday, cast(dow='Tue' as int) as is_tuesday, cast(dow='Wed' as int) as is_wednesday, cast(dow='Thu' as int) as is_thursday, cast(dow='Fri' as int) as is_friday, cast(dow='Sat' as int) as is_saturday, cast(dow='Sun' as int) as is_sunday from dates_with_attrs)
+  , monthfeatures as (select date,cast(month=1 as int) as is_jan, cast(month=2 as int) as is_feb, cast(month=3 as int) as is_mar, cast(month=4 as int) as is_apr, cast(month=5 as int) as is_may, cast(month=6 as int) as is_jun, cast(month=7 as int) as is_jul, cast(month=8 as int) as is_aug, cast(month=9 as int) as is_sep, cast(month=10 as int) as is_oct, cast(month=11 as int) as is_nov, cast(month=12 as int) as is_dec from dates_with_attrs)
+  , weekendfeatures as (select date,(is_monday|is_tuesday|is_wednesday|is_thursday|is_friday) as is_weekday,(is_saturday|is_sunday) as is_weekend from weekdayfeatures)
+  select * from
+	    -- dates
+	    dates_with_attrs
+	    -- dates_with_attrs_with_ordinals
+  left join newyears         using(date)
+  left join mlkdays          using(date)
+  left join valentines       using(date)
+  left join mothersdays      using(date)
+  left join memorialdays     using(date)
+  left join fathersdays      using(date)
+  left join juneteenthdays   using(date)
+  left join july4days        using(date)
+  left join labordays        using(date)
+  left join thanksgivingdays using(date)
+  left join blackfridays     using(date)
+  left join cybermondays     using(date)
+  left join christmasdays    using(date)
+  left join weekdayfeatures  using(date)
+  left join monthfeatures    using(date)
+  left join weekendfeatures  using(date)
+  where 1=1
+  -- and year(date) between 2020 and 2030
+  -- and is_newyears_day=1
+  -- and is_mlkjr_day=1
+  -- and is_valentines_day=1
+  -- and is_mothersday_day=1
+  -- and is_memorial_day=1
+  -- and is_fathersday_day=1
+  -- and is_juneteenth_day=1
+  -- and is_july4_day=1
+  -- and is_labor_day=1
+  -- and is_thanksgiving_day=1
+  -- and is_blackfriday_day=1
+  -- and is_cybermonday_day=1
+  -- and is_christmas_day=1
+  -- and is_weekend=0
+  order by date
+  -- limit 10
+  )
+);
+
+
 
 create or replace function lastarrayelement(arr any type) as ( arr[safe_ordinal(array_length(arr))]);
 -- select lastarrayelement(a) from (select [1,2,3,4] as a union all select [] union all select [1]) s;
