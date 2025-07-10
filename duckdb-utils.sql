@@ -59,7 +59,7 @@ create or replace macro randomstr(len) as (
 -- select randomstr(cast(100*random() as int));
 
 -- holiday features for various timeseries forecasting related tasks...
-create or replace macro holidayfeatures(startdate, enddate) as TABLE
+create or replace macro datefeatures(startdate, enddate) as TABLE
 (
 with
   dates as (select unnest(generate_series(cast(startdate as date),cast(enddate as date),interval 1 day)::date[]) as date)
@@ -120,4 +120,4 @@ where 1=1
 order by date
 -- limit 10
 );
--- select * from holidayfeatures('2025-01-01','2025-12-31');
+-- select * from datefeatures('2025-01-01','2025-12-31');
