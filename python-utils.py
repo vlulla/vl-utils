@@ -1,4 +1,4 @@
-import re, typing, inspect, collections, random, sys, dataclasses as dc,math,statistics as stats
+import re, typing, inspect, collections, random, sys, dataclasses as dc,math,statistics as stats,decimal
 import numpy as np, pandas as pd
 import functools,operator
 try: import hypothesis as hy, hypothesis.strategies as st
@@ -73,7 +73,7 @@ def test_colname_fixer(s: str):
 # Some stats related funcs
 ##def isiterable(x): return isinstance(x, (list, set, tuple, str, np.ndarray, range, pd.Series, pd.DataFrame))
 def isiterable(x): return '__iter__' in dir(x)
-def isnumeric(x): return isinstance(x, (int, float, complex)) ## TODO (vijay): might need to include decimal.Decimal
+def isnumeric(x): return isinstance(x, (int, float, complex, decimal.Decimal))
 ## def avg(xs: collections.abc.Iterable) -> float:
 ##   assert isiterable(xs), "Not an iterable"
 ##   assert all(isnumeric(x) for x in xs), "Non numeric value found"
@@ -130,10 +130,11 @@ def prop(xs: collections.abc.Iterable) -> collections.abc.Iterable:
   """
   assert isiterable(xs), "Not an iterable"
   if isinstance(xs,dict):
-    assert all(isinstance(v,(int,float,complex)) for _,v in xs.items()),"Non numeric values"
+    assert all(isnumeric(v) for _,v in xs.items()),"Non numeric values"
     sv=sum(xs.values())
     ret=({k:v/sv for k,v in xs.items()})
   else:
+    assert all(isnumeric(v) for v in xs),"Non numeric values"
     ret = type(xs)(x/sum(xs) for x in xs)
   return ret
 
