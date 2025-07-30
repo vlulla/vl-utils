@@ -212,7 +212,7 @@ def rangealong(l: collections.abc.Iterable) -> collections.abc.Iterable:
 
 
 def pandas_dataframes() -> typing.Optional[pd.DataFrame]:
-  frames = [(o,globals()[o]) for o in globals() if type(globals()[o]) == pd.DataFrame and o[0] != '_']
+  frames = [(o,globals()[o]) for o in globals() if isinstance(globals()[o], pd.DataFrame) and o[0] != '_']
   if len(frames) == 0:
     print("No pd.DataFrame found in globals().", file=sys.stderr)
     return None
@@ -224,7 +224,7 @@ def pandas_dataframes() -> typing.Optional[pd.DataFrame]:
 
 try:
   def polars_dataframes() -> typing.Optional[pl.DataFrame]:
-    frames = [(o,globals()[o]) for o in globals() if type(globals()[o]) == type(pl.DataFrame()) and o[0] != '_']
+    frames = [(o,globals()[o]) for o in globals() if isinstance(globals()[o],pl.DataFrame) and o[0] != '_']
     if len(frames) == 0:
       print("No pl.DataFrame found in globals().", file=sys.stderr)
       return None
