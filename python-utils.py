@@ -234,7 +234,8 @@ except NameError as e:
   print(f"ERROR: {e}",file=sys.stderr)
 
 try:
-  BQParam = typing.Union[bq.ScalarQueryParameter, bq.ArrayQueryParameter, bq.StructQueryParameter, bq.RangeQueryParameter]
+  BQParam = typing.Union[bq.ScalarQueryParameter, bq.ArrayQueryParameter, bq.StructQueryParameter,]
+  if int(bq.__version__.split(".")[0])>2: BQParam += [bq.RangeQueryParameter]
   def gcp_to_df(qry: str, params:typing.List[BQParam] = [], PROJECT:str = '') -> pd.DataFrame:
     """Example usage:
     df = gcp_to_df(qry="select * from `bigquery-public-data.idc_v17.dicom_all` where StudyDate=@dt",params=[bq.ScalarQueryParameter("dt","DATE",datetime.date(2010,1,1))],PROJECT="<your-project>")
