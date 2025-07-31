@@ -150,8 +150,8 @@ def abbrev(xs: collections.abc.Iterable, n: int = 3) -> collections.abc.Iterable
   >>> abbrev(4,3) # AssertionError!
   """
   assert isiterable(xs), "Not an iterable"
-  assert type(n) == int and n > 0
-  if type(xs) == str: return xs[:n]
+  assert isinstance(n, int) and n > 0
+  if isinstance(xs, str): return xs[:n]
   assert all(isiterable(x) for x in xs), "Not all items are iterable...so cannot take abbrev!"
   return type(xs)([x[:n] for x in xs])
 
@@ -168,13 +168,13 @@ def repeat(x, n: int = 1) -> typing.List:
   >>> repeat(4,2) # [4,4]
   >>> ''.join(repeat('abc',4)) == 'abc'*4 # True
   """
-  assert type(n) == int and n > 0
+  assert isinstance(n,int) and n > 0
   return [x for _ in range(n)]
 
 def genrandstr(n: int = 5, lowercase=False) -> str:
   " >>> [genrandstr(random.randint(2,8)) for _ in range(random.randint(5,10))] "
 
-  assert type(n) == int
+  assert isinstance(n, int)
   if n == 0: return '' # There can be only one kind of a string with len 0!
 
   assert n > 0, f'invalid arg {n=}'
@@ -437,7 +437,7 @@ def gsub[L: list[str] | set[str] | tuple[str]](regex: str, repl: str, lst: str |
   def _gsub(_regex: str, _repl: str, _string: str) -> str:
     regexc = re.compile(_regex, re.IGNORECASE | re.UNICODE | re.VERBOSE)
     return re.sub(regexc, _repl, _string)
-  if type(lst) == type(''): return _gsub(regex, repl, lst)
+  if isinstance(lst, str): return _gsub(regex, repl, lst)
   return type(lst)(_gsub(regex, repl, c) for c in lst)
 
 P = typing.ParamSpec('P')
@@ -510,7 +510,7 @@ def splitarray(xs: collections.abc.Iterable[T], stride:int) -> collections.abc.I
   if xs=='': return ['']
   assert stride > 0, "Cannot have -ve stride!"
   idxs = [(stride*_,(stride*_)+stride) for _ in range(len(xs)//stride)] + ([(stride*(len(xs)//stride),None)] if len(xs)%stride!=0 else [])
-  if type(xs) == str:
+  if isinstance(xs, str):
     ret =          [type(xs)(xs[_[0]:_[-1]]) for _ in idxs]
   else:
     ret = type(xs)([type(xs)(xs[_[0]:_[-1]]) for _ in idxs])
