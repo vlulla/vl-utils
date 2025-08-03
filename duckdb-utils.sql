@@ -63,7 +63,7 @@ create or replace macro datefeatures(startdate, enddate) as TABLE
 (
 with
   dates as (select unnest(generate_series(cast(startdate as date),cast(enddate as date),interval 1 day)::date[]) as date)
-, dates_with_attrs as (select  date,extract(year from date) as year, extract(month from date) as month, extract(day from date) as day, strftime(date, '%a') as dow from dates)
+, dates_with_attrs as (select  date,extract(year from date) as year, extract(month from date) as month, extract(day from date) as day, strftime(date, '%a') as dow,strftime(date,'%j')::int64 as doy from dates)
 , dates_with_attrs_with_ordinals as (select *,row_number() OVER (yearmonweekday order by date) as ordinal_dow from dates_with_attrs window yearmonweekday as (partition by year,month,dow))
 , newyears as (select date,cast((month,day)=(1,1) as int) as is_newyears_day from dates_with_attrs)
 , mlkdays as (select date,cast((month,dow,ordinal_dow)=(1,'Mon',3) and year>1982 as int) as is_mlkjr_day from dates_with_attrs_with_ordinals)
