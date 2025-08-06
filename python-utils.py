@@ -1,3 +1,11 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# dependencies = ["numpy","pyarrow","pandas","hypothesis","polars","duckdb",]
+# ///
+##
+## bash $ uv run example.py
+## bash $ uv run --python 3.10 example.py # to use specific version of python
+##
 import re, typing, inspect, collections, random, sys, dataclasses as dc,math,statistics as stats,decimal, fractions, numbers
 import numpy as np, pandas as pd
 import functools,operator
