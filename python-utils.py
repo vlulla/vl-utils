@@ -554,6 +554,25 @@ def togglesqlcomment(s):
   if not s: return s ## s=="" or s==None
   return s[3:] if s[:3] == '-- ' else f"-- {s}"
 
+def install_packages(pkgs: str | list[str]) -> None:
+  """
+  >>> install_packages("prophet")
+  >>> install_packages(["numpyro", "pymc", "prophet"])
+  """
+  import sys, subprocess
+  if isinstance(pkgs, str): pkgs = [pkgs]
+  cmd = [sys.executable, "-m", "pip", "list"]
+  with subprocess.Popen(cmd, stdout=subprocess.PIPE) as proc:
+    installed_pkgs = {p.split()[0:1][0] for p in
+      proc.stdout.read().decode("utf-8").splitlines()[2:] # first two lines are header
+    }
+  missing_pkgs = set(pkgs) - installed_pkgs
+  if missing_pkgs:
+    print(f"{missing_pkgs=}...installing...", file=sys.stderr)
+    cmd = [sys.executable, "-m", "pip", "install", "--upgrade", ] + list(missing_pkgs)
+    subprocess.run(cmd, check=True)
+  else:
+    print(f"{pkgs=} already installed!")
 
 ## some aliases ... especially useful in repl
 def print_source(o): print(get_source(o))
