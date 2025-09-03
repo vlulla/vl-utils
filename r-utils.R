@@ -47,7 +47,7 @@ updatepkgs <- my.update.packages <- function(...) {
     r["CRAN"] <- "https://cloud.r-project.org"
     r["INLA"] <- "https://inla.r-inla-download.org/R/stable"
     options(repos=r)})
-  update.packages(checkBuilt=TRUE, ask=FALSE, dependencies=TRUE)
+  update.packages(checkBuilt=TRUE, ask=FALSE, dependencies=TRUE, Ncpus=parallel::detectCores()-2L, ...)
 }
 
 # std. error
