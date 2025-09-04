@@ -9,6 +9,10 @@
 import re, typing, inspect, collections, random, sys, dataclasses as dc,math,statistics as stats,decimal, fractions, numbers
 import numpy as np, pandas as pd
 import functools,operator
+
+try: import jax.numpy as jnp
+except ModuleNotFoundError as e: print(f"ERROR: {e =}", file=sys.stderr)
+
 try: import hypothesis as hy, hypothesis.strategies as st
 except ModuleNotFoundError as e: print(f"ERROR: {e}",file=sys.stderr)
 
