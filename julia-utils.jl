@@ -10,5 +10,5 @@ function install_pkgs(pkgs...)
   end
 end
 ## Some of the packages i commonly use...
-## install_pkgs("DataFrames","Distributions","GLM","MixedModels","Plots","StatsBase","RDatasets")
+## install_pkgs("DataFrames","Distributions","GLM","MixedModels","Plots","StatsBase","RDatasets", "JuMP", "XGBoost")
 
