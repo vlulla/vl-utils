@@ -223,24 +223,34 @@ def rangealong(l: collections.abc.Iterable) -> collections.abc.Iterable:
   return range(len(l))
 
 
-def pandas_dataframes() -> typing.Optional[pd.DataFrame]:
-  frames = [(o,globals()[o]) for o in globals() if isinstance(globals()[o], pd.DataFrame) and o[0] != '_']
+def pandas_dataframes(depth=1) -> typing.Optional[pd.DataFrame]:
+  ## frames = [(o,globals()[o]) for o in globals() if isinstance(globals()[o], pd.DataFrame) and o[0] != '_']
+  parent = sys._getframe(depth)
+  frames = tuple(
+    (k,v) for k,v in parent.f_locals.items()
+    if isinstance(v, pd.DataFrame) and k[0] != '_'
+  )
   if len(frames) == 0:
-    print("No pd.DataFrame found in globals().", file=sys.stderr)
+    print("No pd.DataFrame found in the environment.", file=sys.stderr)
     return None
   ## result = pd.DataFrame([(n, d.memory_usage(deep=True).sum(), *d.shape, d.columns.array.tolist()) for n,d in frames],
   ##                       columns=["dataframe","memsize","nrow","ncol","columns"])
   result = pd.DataFrame([(n, *d.shape, d.columns.array.tolist()) for n,d in frames],
-                        columns=["dataframe","nrow","ncol","columns"])
+                        columns=["df","nr","nc","cols"])
   return result
 
 try:
-  def polars_dataframes() -> typing.Optional[pl.DataFrame]:
-    frames = [(o,globals()[o]) for o in globals() if isinstance(globals()[o],pl.DataFrame) and o[0] != '_']
+  def polars_dataframes(depth=1) -> typing.Optional[pl.DataFrame]:
+    ## frames = [(o,globals()[o]) for o in globals() if isinstance(globals()[o],pl.DataFrame) and o[0] != '_']
+    parent = sys._getframe(depth)
+    frames = tuple(
+      (k,v) for k,v in parent.f_locals.items()
+      if isinstance(v,pl.DataFrame) and k[0] != '_'
+    )
     if len(frames) == 0:
-      print("No pl.DataFrame found in globals().", file=sys.stderr)
+      print("No pl.DataFrame found in the environment.", file=sys.stderr)
       return None
-    result = pl.DataFrame([(n, *d.shape, d.columns,round(d.estimated_size(unit="mb"),2)) for n,d in frames],schema=["dataframe","nrow","ncol","columns","size (mb)"], orient="row")
+    result = pl.DataFrame([(n, *d.shape, d.columns,round(d.estimated_size(unit="mb"),2)) for n,d in frames],schema=["df","nr","nc","cols","sz (mb)"], orient="row")
     return result
 except NameError as e:
   print(f"ERROR: {e}",file=sys.stderr)
