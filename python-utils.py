@@ -228,7 +228,7 @@ def pandas_dataframes(depth=1) -> typing.Optional[pd.DataFrame]:
   parent = sys._getframe(depth)
   frames = tuple(
     (k,v) for k,v in parent.f_locals.items()
-    if isinstance(v, pd.DataFrame) and k[0] != '_'
+    if isinstance(v, pd.DataFrame) ## and k[0] != '_'
   )
   if len(frames) == 0:
     print("No pd.DataFrame found in the environment.", file=sys.stderr)
@@ -245,7 +245,7 @@ try:
     parent = sys._getframe(depth)
     frames = tuple(
       (k,v) for k,v in parent.f_locals.items()
-      if isinstance(v,pl.DataFrame) and k[0] != '_'
+      if isinstance(v,pl.DataFrame) ## and k[0] != '_'
     )
     if len(frames) == 0:
       print("No pl.DataFrame found in the environment.", file=sys.stderr)
