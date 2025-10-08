@@ -121,3 +121,7 @@ order by date
 -- limit 10
 );
 -- select * from datefeatures('2025-01-01','2025-12-31');
+
+-- workaround for missing difference operator for time data type
+create or replace macro time_diff(t1, t2) as ('2000-01-01T'||t1)::timestamp - ('2000-01-01T'||t2)::timestamp;
+-- select time_diff(time '20:18:32.05', time '18:00:28.1'); -- same as time '20:18:32.05' - time '18:00:28.1'
