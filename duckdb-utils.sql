@@ -125,3 +125,7 @@ order by date
 -- workaround for missing difference operator for time data type
 create or replace macro time_diff(t1, t2) as ('2000-01-01T'||t1)::timestamp - ('2000-01-01T'||t2)::timestamp;
 -- select time_diff(time '20:18:32.05', time '18:00:28.1'); -- same as time '20:18:32.05' - time '18:00:28.1'
+
+-- D VACUUM ANALYZE;
+-- D call table_sizes(); -- to get dims of table...
+create or replace macro table_sizes() as TABLE (select database_name,schema_name,table_name,estimated_size as nrow,column_count as ncol from duckdb_tables());
