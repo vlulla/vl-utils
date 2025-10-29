@@ -6,7 +6,7 @@
 ## bash $ uv run example.py
 ## bash $ uv run --python 3.10 example.py # to use specific version of python
 ##
-import re, typing, inspect, collections, random, sys, dataclasses as dc,math,statistics as stats,decimal, fractions, numbers
+import re, typing, inspect, collections, random, sys, dataclasses as dc,math,decimal, fractions, numbers
 import numpy as np, pandas as pd
 import functools,operator
 
@@ -90,7 +90,7 @@ def isnumeric(x): return isinstance(x, numbers.Number)
 ##   assert isiterable(xs), "Not an iterable"
 ##   assert all(isnumeric(x) for x in xs), "Non numeric value found"
 ##   return sum(xs)/len(xs)
-mean = average = avg = stats.mean
+mean = average = avg = np.mean
 def nrange(xs: collections.abc.Iterable) -> typing.Tuple: # mnemonic: numeric range?
   assert isiterable(xs)
   assert all(isnumeric(x) for x in xs), "Non numeric value found"
