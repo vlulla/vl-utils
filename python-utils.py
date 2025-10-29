@@ -11,22 +11,22 @@ import numpy as np, pandas as pd
 import functools,operator
 
 try: import jax.numpy as jnp
-except ModuleNotFoundError as e: print(f"ERROR: {e =}", file=sys.stderr)
+except ModuleNotFoundError as e: print(f"{e=}", file=sys.stderr)
 
 try: import hypothesis as hy, hypothesis.strategies as st
-except ModuleNotFoundError as e: print(f"ERROR: {e}",file=sys.stderr)
+except ModuleNotFoundError as e: print(f"{e=}",file=sys.stderr)
 
 try: import polars as pl
-except ModuleNotFoundError as e: print(f"ERROR: {e}",file=sys.stderr)
+except ModuleNotFoundError as e: print(f"{e=}",file=sys.stderr)
 
 try: from google.cloud import bigquery as bq
-except ModuleNotFoundError as e: print(f"ERROR: {e}",file=sys.stderr)
+except ModuleNotFoundError as e: print(f"{e=}",file=sys.stderr)
 
 try: import duckdb as ddb
-except ModuleNotFoundError as e: print(f"ERROR: {e}", file=sys.stderr)
+except ModuleNotFoundError as e: print(f"{e=}", file=sys.stderr)
 
 try: import pyarrow as pa
-except ModuleNotFoundError as e: print(f"ERROR: {e}", file=sys.stderr)
+except ModuleNotFoundError as e: print(f"{e=}", file=sys.stderr)
 
 def fix_colnames(colname: str, normalize_adjacent_uppers: bool = True) -> str:
   """
@@ -206,7 +206,7 @@ def get_source(obj) -> str:
       src = inspect.getsource(o)
     except TypeError as e:
       src = f"src {str(o)} of built-in module, class, or function unavailable"
-      print(f"{e}",file=sys.stderr)
+      print(f"{e=}",file=sys.stderr)
     return src
   return _get_src(obj)
 
@@ -253,7 +253,7 @@ try:
     result = pl.DataFrame([(n, *d.shape, d.columns,round(d.estimated_size(unit="mb"),2)) for n,d in frames],schema=["df","nr","nc","cols","sz (mb)"], orient="row")
     return result
 except NameError as e:
-  print(f"ERROR: {e}",file=sys.stderr)
+  print(f"{e=}",file=sys.stderr)
 
 try:
   BQParam = typing.Union[bq.ScalarQueryParameter, bq.ArrayQueryParameter, bq.StructQueryParameter,]
@@ -297,7 +297,7 @@ try:
     df = gcp_to_polars(qry, PROJECT=PROJECT)
     return df
 except NameError as e:
-  print(f"ERROR: {e}",file=sys.stderr)
+  print(f"{e=}",file=sys.stderr)
 
 def calculate_woe(df: pd.DataFrame, feature: str, target: str, zeroadjust=True) -> typing.Tuple[pd.DataFrame, float]:
   ## https://documentation.sas.com/doc/en/vdmmlcdc/8.1/casstat/viyastat_binning_details02.htm
@@ -508,7 +508,7 @@ def args(o: object) -> inspect.Signature:
   try:
     sig = inspect.signature(o)
   except ValueError as e:
-    print(f"{e}", file=sys.stderr)
+    print(f"{e=}", file=sys.stderr)
     sig = None
   return sig
 
