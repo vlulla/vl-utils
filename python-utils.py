@@ -290,7 +290,7 @@ try:
     ## df = gcp_to_df(qry,params,PROJECT)
     ## dfp = pl.from_arrow(pa.Table.from_pandas(df)) ## NOTE (vijay): need this because pl.from_pandas(df) cannot read db_dtypes.dbdate datatype!
     ## return dfp
-    df = pl.from_arrow(client.query(qry, job_config=job_config).to_arrow())
+    df = pl.DataFrame(client.query(qry, job_config=job_config).to_arrow())
     return df
   def polars_from_bqsql(fname: str, PROJECT: str) -> pl.DataFrame:
     with open(fname,"r") as fd: qry = fd.read()
