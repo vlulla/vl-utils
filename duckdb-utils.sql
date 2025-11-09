@@ -130,3 +130,8 @@ create or replace macro time_diff(t1, t2) as ('2000-01-01T'||t1)::timestamp - ('
 -- D VACUUM ANALYZE;
 -- D call table_dims(); -- to get dims of table...
 create or replace macro table_dims() as TABLE (select database_name,schema_name,table_name,estimated_size as nrow,column_count as ncol from duckdb_tables());
+
+-- similar to R's expand.grid
+-- D select * from grid([1,2],[1,2,3,4,5,6]);
+-- D with grid as (select * from grid(range(1,7),range(1,7))) select a+b as sum,count(*) as cnt from grid group by all order by cnt desc; -- generate most likely outcomes of two dice!
+create or replace macro grid(a,b) as TABLE(with a as(select unnest(a) as a), b as (select unnest(b) as b) select * from a,b);
