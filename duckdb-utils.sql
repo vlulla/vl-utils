@@ -10,6 +10,7 @@ create or replace macro yearqtr(x) as (select (year(x::date)*10)+quarter(x::date
 create or replace macro calendar_between_dates(start_date,end_date) as table (with _ as (select unnest(generate_series(start_date::date,end_date::date,interval 1 day)::date[])::date as dt) select dt,strftime(dt,'%a') as dow, year(dt) as YYYY, month(dt) as M, dayofmonth(dt) DOM, weekofyear(dt) as WOY, yearweek(dt) as ISOYYYYWK,isodow(dt) as ISODOW,dayofweek(dt) as dow_num,quarter(dt) as Q, YYYY||''||Q as YYYYQ from _);
 
 -- select * from calendar_year(2024);
+-- with _ as (select extract(year from current_date())+unnest(range(1,11)) as yr) select * from _,calendar_year(_.yr) order by dt; -- table for next 10 years!
 create or replace macro calendar_year(yr) as TABLE (select * from calendar_between_dates(yr||'-01-01', yr||'-12-31'));
 
 -- select * from random_date_range(10);
