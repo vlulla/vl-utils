@@ -7,7 +7,40 @@
 create or replace macro yearqtr(x) as (select (year(x::date)*10)+quarter(x::date));
 
 -- select * from calendar_between_dates('2024-06-15','2025-02-13'); -- calendar dates between custom dates!!
-create or replace macro calendar_between_dates(start_date,end_date) as table (with _ as (select unnest(generate_series(start_date::date,end_date::date,interval 1 day)::date[])::date as dt) select dt,strftime(dt,'%a') as dow, year(dt) as YYYY, month(dt) as M, dayofmonth(dt) DOM, weekofyear(dt) as WOY, yearweek(dt) as ISOYYYYWK,isodow(dt) as ISODOW,dayofweek(dt) as dow_num,quarter(dt) as Q, YYYY||''||Q as YYYYQ from _);
+create or replace macro calendar_between_dates(start_date,end_date) as table (
+with
+  dates as (select unnest(generate_series(start_date::date,end_date::date,interval 1 day)::date[])::date as dt)
+, dates_with_attrs as (select dt,year(dt) as YYYY, month(dt) as MM, extract(day from dt) as DD, dayofmonth(dt) as DOM, weekofyear(dt) as WOY, yearweek(dt) as ISOYYYYWK, extract(weekday from dt) as dow,strftime(dt,'%a') as dow_n, isodow(dt) as ISODOW, dayofweek(dt) as dow_num, quarter(dt) as Q,YYYY||''||Q as YYYYQ from dates)
+, dates_with_attrs_with_ordinals as (select *,row_number() OVER (yearmonweekday order by dt) as ordinal_dow from dates_with_attrs window yearmonweekday as (partition by YYYY,MM,dow))
+select * exclude(holiday)
+, case
+    when lag(holiday,1) over(partition by YYYY order by dt)='Thanksgiving' then 'BlackFriday'
+    when lag(holiday,4) over(partition by YYYY order by dt)='Thanksgiving' then 'Cyber Monday'
+    else holiday
+  end as holiday from (
+  select *
+   , case
+       when ((MM,DD))=(1,1) then 'New Year''s day'
+       when ((MM,dow_n,ordinal_dow)=(1,'Mon',3) and YYYY>1982) then 'Martin Luther King Jr. day'
+       when ((MM,DD)=(2,14)) then 'Valentine''s day'
+       when ((MM,dow_n,ordinal_dow)=(5,'Sun',2)) then 'Mother''s day'
+       when ((MM,dow_n,dt)=(5,'Mon',last_value(dt) OVER yearmondowwin)) then 'Memorial day'
+       when ((MM,dow_n,ordinal_dow)=(6,'Sun',3)) then 'Father''s day'
+       when ((MM,DD)=(6,19) and YYYY>=2021) then 'Juneteenth day'
+       when ((MM,DD)=(7,4)) then 'Independence day'
+       when ((MM,dow_n,dt)=(9,'Mon',first_value(dt) OVER yearmondowwin)) then 'Labor day'
+       when ((MM,DD)=(10,31)) then 'Halloween'
+       when ((MM,dow_n,ordinal_dow)=(11,'Thu',4)) then 'Thanksgiving'
+       -- when TODO (vijay) black friday
+       -- when TODO (vijay) cyber monday ... can be in december...
+       when ((MM,DD)=(12,24)) then 'Christmas eve'
+       when ((MM,DD)=(12,25)) then 'Christmas'
+       else null
+   end as holiday
+  from dates_with_attrs_with_ordinals
+  window yearmondowwin as (partition by YYYY,MM,dow)
+)
+);
 
 -- select * from calendar_year(2024);
 -- with _ as (select extract(year from current_date())+unnest(range(1,11)) as yr) select * from _,calendar_year(_.yr) order by dt; -- table for next 10 years!
