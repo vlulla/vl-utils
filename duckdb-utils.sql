@@ -20,21 +20,19 @@ select * exclude(holiday)
   end as holiday from (
   select *
    , case
-       when ((MM,DD))=(1,1) then 'New Year''s day'
-       when ((MM,dow_n,ordinal_dow)=(1,'Mon',3) and YYYY>1982) then 'Martin Luther King Jr. day'
-       when ((MM,DD)=(2,14)) then 'Valentine''s day'
-       when ((MM,dow_n,ordinal_dow)=(5,'Sun',2)) then 'Mother''s day'
-       when ((MM,dow_n,dt)=(5,'Mon',last_value(dt) OVER yearmondowwin)) then 'Memorial day'
-       when ((MM,dow_n,ordinal_dow)=(6,'Sun',3)) then 'Father''s day'
-       when ((MM,DD)=(6,19) and YYYY>=2021) then 'Juneteenth day'
-       when ((MM,DD)=(7,4)) then 'Independence day'
-       when ((MM,dow_n,dt)=(9,'Mon',first_value(dt) OVER yearmondowwin)) then 'Labor day'
-       when ((MM,DD)=(10,31)) then 'Halloween'
-       when ((MM,dow_n,ordinal_dow)=(11,'Thu',4)) then 'Thanksgiving'
-       -- when TODO (vijay) black friday
-       -- when TODO (vijay) cyber monday ... can be in december...
-       when ((MM,DD)=(12,24)) then 'Christmas eve'
-       when ((MM,DD)=(12,25)) then 'Christmas'
+       when (MM,DD)=(1,1) then 'New Year''s day'
+       when (MM,dow_n,ordinal_dow)=(1,'Mon',3) and YYYY>1982 then 'Martin Luther King Jr. day'
+       when (MM,DD)=(2,14) then 'Valentine''s day'
+       when (MM,dow_n,ordinal_dow)=(5,'Sun',2) then 'Mother''s day'
+       when (MM,dow_n,dt)=(5,'Mon',last_value(dt) OVER yearmondowwin) then 'Memorial day'
+       when (MM,dow_n,ordinal_dow)=(6,'Sun',3) then 'Father''s day'
+       when (MM,DD)=(6,19) and YYYY>=2021 then 'Juneteenth day'
+       when (MM,DD)=(7,4) then 'Independence day'
+       when (MM,dow_n,dt)=(9,'Mon',first_value(dt) OVER yearmondowwin) then 'Labor day'
+       when (MM,DD)=(10,31) then 'Halloween'
+       when (MM,dow_n,ordinal_dow)=(11,'Thu',4) then 'Thanksgiving'
+       when (MM,DD)=(12,24) then 'Christmas eve'
+       when (MM,DD)=(12,25) then 'Christmas'
        else null
    end as holiday
   from dates_with_attrs_with_ordinals
