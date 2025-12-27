@@ -588,6 +588,12 @@ def install_packages(pkgs: str | list[str]) -> None:
   else:
     print(f"{pkgs=} already installed!")
 
+## Like R's source function
+def source(fname: str) -> None:
+    with open(fname) as fd:
+        code = compile(fd.read(), fname, "exec")
+        exec(code)
+
 ## some aliases ... especially useful in repl
 def print_source(o): print(get_source(o))
 print_src, get_src = print_source, get_source
