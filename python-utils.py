@@ -331,7 +331,7 @@ def df_coltypes(df: T) -> T:
     ret = pd.DataFrame(cols_with_attrs, columns=["colidx", "colname", "coltype", "nunique", "numna", "pctna"])
   elif typ == pl.DataFrame:
     cols_with_attrs = [(i,c,f"{str(df[c].dtype)}",df[c].n_unique(),df[c].null_count(),100*df[c].null_count()/df.shape[0]) for i,c in enumerate(df.columns)]
-    ret = pl.DataFrame( cols_with_attrs,schema=["colidx","colname","coltype","nunique","numna","pctna"])
+    ret = pl.DataFrame( cols_with_attrs,schema=["colidx","colname","coltype","nunique","numna","pctna"], orient="row")
   return ret
 
 def make_dataclass_from_df(df: pd.DataFrame, name_of_dataclass: str="DF"):
