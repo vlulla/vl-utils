@@ -6,7 +6,7 @@
 ## bash $ uv run example.py
 ## bash $ uv run --python 3.10 example.py # to use specific version of python
 ##
-import re, typing, inspect, collections, random, sys, dataclasses as dc,math,decimal, fractions, numbers
+import re, typing as t, inspect, collections, random, sys, dataclasses as dc,math,decimal, fractions, numbers
 import numpy as np, pandas as pd
 import functools,operator
 
@@ -63,7 +63,7 @@ def fix_colnames(colname: str, normalize_adjacent_uppers: bool = True) -> str:
   return fixed_colname
 
 
-T = typing.TypeVar("T")
+T = t.TypeVar("T")
 def identity(x: T) -> T: return x ## surprisingly useful!
 
 ## ## @hy.settings(max_examples=500) # more thorough but slower
@@ -91,7 +91,7 @@ def isnumeric(x): return isinstance(x, numbers.Number)
 ##   assert all(isnumeric(x) for x in xs), "Non numeric value found"
 ##   return sum(xs)/len(xs)
 mean = average = avg = np.mean
-def nrange(xs: collections.abc.Iterable) -> typing.Tuple: # mnemonic: numeric range?
+def nrange(xs: collections.abc.Iterable) -> t.Tuple: # mnemonic: numeric range?
   assert isiterable(xs)
   assert all(isnumeric(x) for x in xs), "Non numeric value found"
   return min(xs),max(xs)
@@ -174,7 +174,7 @@ def every_nth(n: int):
   assert isinstance(n, int) and n > 0
   return slice(None,None,n)
 
-def repeat(x, n: int = 1) -> typing.List:
+def repeat(x, n: int = 1) -> t.List:
   """
   >>> repeat([1,2,3],2) # [[1,2,3],[1,2,3]]
   >>> repeat(4,2) # [4,4]
@@ -223,7 +223,7 @@ def rangealong(l: collections.abc.Iterable) -> collections.abc.Iterable:
   return range(len(l))
 
 
-def pandas_dataframes(depth=1) -> typing.Optional[pd.DataFrame]:
+def pandas_dataframes(depth=1) -> t.Optional[pd.DataFrame]:
   ## frames = [(o,globals()[o]) for o in globals() if isinstance(globals()[o], pd.DataFrame) and o[0] != '_']
   parent = sys._getframe(depth)
   frames = tuple(
@@ -240,7 +240,7 @@ def pandas_dataframes(depth=1) -> typing.Optional[pd.DataFrame]:
   return result
 
 try:
-  def polars_dataframes(depth=1) -> typing.Optional[pl.DataFrame]:
+  def polars_dataframes(depth=1) -> t.Optional[pl.DataFrame]:
     ## frames = [(o,globals()[o]) for o in globals() if isinstance(globals()[o],pl.DataFrame) and o[0] != '_']
     parent = sys._getframe(depth)
     frames = tuple(
@@ -256,9 +256,9 @@ except NameError as e:
   print(f"{e=}",file=sys.stderr)
 
 try:
-  BQParam = typing.Union[bq.ScalarQueryParameter, bq.ArrayQueryParameter, bq.StructQueryParameter,]
+  BQParam = t.Union[bq.ScalarQueryParameter, bq.ArrayQueryParameter, bq.StructQueryParameter,]
   if int(bq.__version__.split(".")[0])>2: BQParam |= bq.RangeQueryParameter
-  def gcp_to_df(qry: str, params:typing.List[BQParam] = [], PROJECT:str = '') -> pd.DataFrame:
+  def gcp_to_df(qry: str, params:t.List[BQParam] = [], PROJECT:str = '') -> pd.DataFrame:
     """Example usage:
     df = gcp_to_df(qry="select * from `bigquery-public-data.idc_v17.dicom_all` where StudyDate=@dt",params=[bq.ScalarQueryParameter("dt","DATE",datetime.date(2010,1,1))],PROJECT="<your-project>")
     """
@@ -278,7 +278,7 @@ try:
     with open(fname,"r") as fd: qry = fd.read()
     df = gcp_to_df(qry, PROJECT=PROJECT)
     return df
-  def gcp_to_polars(qry: str, params:typing.List[BQParam]=[], PROJECT:str='') -> pl.DataFrame:
+  def gcp_to_polars(qry: str, params:t.List[BQParam]=[], PROJECT:str='') -> pl.DataFrame:
     ## NOTE (vijay): This does not work with Interval/Duration types! I get the error "The datatype tin (for IntervalUnit::MonthDayNanon) is still not supported in Rust implementation....see https://arrow.apache.org/rust/src/arrow_schema/ffi.rs.html
     assert PROJECT != '', f"Cannot have empty PROJECT"
     if len(params) > 0:
@@ -299,7 +299,7 @@ try:
 except NameError as e:
   print(f"{e=}",file=sys.stderr)
 
-def calculate_woe(df: pd.DataFrame, feature: str, target: str, zeroadjust=True) -> typing.Tuple[pd.DataFrame, float]:
+def calculate_woe(df: pd.DataFrame, feature: str, target: str, zeroadjust=True) -> t.Tuple[pd.DataFrame, float]:
   ## https://documentation.sas.com/doc/en/vdmmlcdc/8.1/casstat/viyastat_binning_details02.htm
   ## https://www.google.com/search?q=weight+of+evidence
 
@@ -352,7 +352,7 @@ def make_dataclass_from_df(df: pd.DataFrame, name_of_dataclass: str="DF"):
   import dataclasses as dc
   return dc.make_dataclass(name_of_dataclass, [(str(c).replace(' ','_'), df[c].dtypes.type) for c in df.columns])
 
-def get_callables_for(o: typing.Any) -> typing.Dict[str,typing.Callable]:
+def get_callables_for(o: t.Any) -> t.Dict[str,t.Callable]:
   """
     >>> pd_funcs = (get_callables_for(pd) | get_callables_for(pd.DataFrame) | get_callables_for(pd.Series))
     >>> df = pd.DataFrame([(name,inspect.signature(func),len(inspect.signature(func).parameters))
@@ -418,7 +418,7 @@ def grep[L: collections.abc.Iterable[T]](regex: str, lst: L, invert=False, ignor
   if invert: return type(lst)(c for c in lst if re.search(regexc, c) is     None)
   return            type(lst)(c for c in lst if re.search(regexc, c) is not None)
 
-def grepl[L: typing.Union[list,tuple]](regex: str, lst: L, invert=False, ignorecase=False) -> L:
+def grepl[L: t.Union[list,tuple]](regex: str, lst: L, invert=False, ignorecase=False) -> L:
   """
   Like R's grepl function
   >>> grepl("_spend", ['abc', 'xyz_spend', 'abc_spend_xyz'])
@@ -462,7 +462,7 @@ def gsub[L: list[str] | set[str] | tuple[str]](regex: str, repl: str, lst: str |
   if isinstance(lst, str): return _gsub(regex, repl, lst)
   return type(lst)(_gsub(regex, repl, c) for c in lst)
 
-P = typing.ParamSpec('P')
+P = t.ParamSpec('P')
 def negate(pred: collections.abc.Callable[P, bool]) -> collections.abc.Callable[P, bool]:
   """
   This is useful for filter. And, it is also like itertools.filterfalse
