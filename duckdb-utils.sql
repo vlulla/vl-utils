@@ -11,7 +11,7 @@ create or replace macro calendar_between_dates(start_date,end_date) as table (
 with
   dates as (select unnest(generate_series(start_date::date,end_date::date,interval 1 day)::date[])::date as dt)
 , dates_with_attrs as (select dt,year(dt) as YYYY, month(dt) as MM, extract(day from dt) as DD, dayofmonth(dt) as DOM, weekofyear(dt) as WOY, yearweek(dt) as ISOYYYYWK, extract(weekday from dt) as dow,strftime(dt,'%a') as dow_n, isodow(dt) as ISODOW, dayofweek(dt) as dow_num, quarter(dt) as Q,YYYY||''||Q as YYYYQ from dates)
-, dates_with_attrs_with_ordinals as (select *,row_number() OVER (yearmonweekday order by dt) as ordinal_dow from dates_with_attrs window yearmonweekday as (partition by YYYY,MM,dow))
+, dates_with_attrs_with_ordinals as (select *,row_number() OVER (yearmonweekday order by dt) as nth_dow from dates_with_attrs window yearmonweekday as (partition by YYYY,MM,dow))
 select * exclude(holiday)
 , case
     when lag(holiday,1) over(partition by YYYY order by dt)='Thanksgiving' then 'BlackFriday'
@@ -21,16 +21,16 @@ select * exclude(holiday)
   select *
    , case
        when (MM,DD)=(1,1) then 'New Year''s day'
-       when (MM,dow_n,ordinal_dow)=(1,'Mon',3) and YYYY>1982 then 'Martin Luther King Jr. day'
+       when (MM,dow_n,nth_dow)=(1,'Mon',3) and YYYY>1982 then 'Martin Luther King Jr. day'
        when (MM,DD)=(2,14) then 'Valentine''s day'
-       when (MM,dow_n,ordinal_dow)=(5,'Sun',2) then 'Mother''s day'
+       when (MM,dow_n,nth_dow)=(5,'Sun',2) then 'Mother''s day'
        when (MM,dow_n,dt)=(5,'Mon',last_value(dt) OVER yearmondowwin) then 'Memorial day'
-       when (MM,dow_n,ordinal_dow)=(6,'Sun',3) then 'Father''s day'
+       when (MM,dow_n,nth_dow)=(6,'Sun',3) then 'Father''s day'
        when (MM,DD)=(6,19) and YYYY>=2021 then 'Juneteenth day'
        when (MM,DD)=(7,4) then 'Independence day'
        when (MM,dow_n,dt)=(9,'Mon',first_value(dt) OVER yearmondowwin) then 'Labor day'
        when (MM,DD)=(10,31) then 'Halloween'
-       when (MM,dow_n,ordinal_dow)=(11,'Thu',4) then 'Thanksgiving'
+       when (MM,dow_n,nth_dow)=(11,'Thu',4) then 'Thanksgiving'
        when (MM,DD)=(12,24) then 'Christmas eve'
        when (MM,DD)=(12,25) then 'Christmas'
        else null
@@ -96,17 +96,17 @@ create or replace macro datefeatures(startdate, enddate) as TABLE
 with
   dates as (select unnest(generate_series(cast(startdate as date),cast(enddate as date),interval 1 day)::date[]) as date)
 , dates_with_attrs as (select  date,extract(year from date) as year, extract(month from date) as month, extract(day from date) as day, strftime(date, '%a') as dow,strftime(date,'%j')::int64 as doy from dates)
-, dates_with_attrs_with_ordinals as (select *,row_number() OVER (yearmonweekday order by date) as ordinal_dow from dates_with_attrs window yearmonweekday as (partition by year,month,dow))
+, dates_with_attrs_with_ordinals as (select *,row_number() OVER (yearmonweekday order by date) as nth_dow from dates_with_attrs window yearmonweekday as (partition by year,month,dow))
 , newyears as (select date,cast((month,day)=(1,1) as int) as is_newyears_day from dates_with_attrs)
-, mlkdays as (select date,cast((month,dow,ordinal_dow)=(1,'Mon',3) and year>1982 as int) as is_mlkjr_day from dates_with_attrs_with_ordinals)
+, mlkdays as (select date,cast((month,dow,nth_dow)=(1,'Mon',3) and year>1982 as int) as is_mlkjr_day from dates_with_attrs_with_ordinals)
 , valentines as (select date,cast((month,day)=(2,14) as int) as is_valentines_day from dates_with_attrs)
 , memorialdays as (select date,cast(date in (select max(date) from dates_with_attrs_with_ordinals where (month,dow)=(5,'Mon') group by year) as int) as is_memorial_day from dates)
-, mothersdays as (select date,cast((month,dow,ordinal_dow)=(5,'Sun',2) as int) as is_mothersday from dates_with_attrs_with_ordinals)
-, fathersdays as (select date,cast((month,dow,ordinal_dow)=(6,'Sun',3) as int) as is_fathersday from dates_with_attrs_with_ordinals)
+, mothersdays as (select date,cast((month,dow,nth_dow)=(5,'Sun',2) as int) as is_mothersday from dates_with_attrs_with_ordinals)
+, fathersdays as (select date,cast((month,dow,nth_dow)=(6,'Sun',3) as int) as is_fathersday from dates_with_attrs_with_ordinals)
 , juneteenthdays as (select date,cast((month,day)=(6,19) and year>=2021 as int) as is_juneteenth_day from dates_with_attrs)
 , july4days as (select date,cast((month,day)=(7,4) as int) as is_july4_day from dates_with_attrs)
-, labordays as (select date,cast((month,dow,ordinal_dow)=(9,'Mon',1) as int) as is_labor_day from dates_with_attrs_with_ordinals)
-, thanksgivingdays as (select date,cast((month,dow,ordinal_dow)=(11,'Thu',4) as int) as is_thanksgiving_day from dates_with_attrs_with_ordinals)
+, labordays as (select date,cast((month,dow,nth_dow)=(9,'Mon',1) as int) as is_labor_day from dates_with_attrs_with_ordinals)
+, thanksgivingdays as (select date,cast((month,dow,nth_dow)=(11,'Thu',4) as int) as is_thanksgiving_day from dates_with_attrs_with_ordinals)
 , blackfridays as (select date,cast(date in (select date (date+interval 1 day) from thanksgivingdays where is_thanksgiving_day<>0) as int) as is_blackfriday from dates)
 , cybermondays as (select date,cast(date in (select date (date+interval 4 day) from thanksgivingdays where is_thanksgiving_day<>0) as int) as is_cybermonday from dates)
 , christmasdays as (select date,cast((month,day)=(12,25) as int) as is_christmas_day from dates_with_attrs)
