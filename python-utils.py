@@ -91,11 +91,11 @@ def isnumeric(x): return isinstance(x, numbers.Number)
 ##   assert all(isnumeric(x) for x in xs), "Non numeric value found"
 ##   return sum(xs)/len(xs)
 mean = average = avg = np.mean
-def nrange(xs: collections.abc.Iterable) -> t.Tuple: # mnemonic: numeric range?
+def nrange(xs: collections.abc.Iterable[T]) -> tuple[T,T]: # mnemonic: numeric range?
   assert isiterable(xs)
   assert all(isnumeric(x) for x in xs), "Non numeric value found"
   return min(xs),max(xs)
-def cumsum(xs: collections.abc.Iterable) -> collections.abc.Iterable:
+def cumsum(xs: collections.abc.Iterable[T]) -> collections.abc.Iterable[T]:
   assert isiterable(xs)
   assert all(isnumeric(x) for x in xs), "Non numeric value found"
   s=[sum(xs[:i+1]) for i in range(len(xs))]
@@ -174,7 +174,7 @@ def every_nth(n: int):
   assert isinstance(n, int) and n > 0
   return slice(None,None,n)
 
-def repeat(x, n: int = 1) -> t.List:
+def repeat(x: T, n: int = 1) -> list[T]:
   """
   >>> repeat([1,2,3],2) # [[1,2,3],[1,2,3]]
   >>> repeat(4,2) # [4,4]
@@ -256,9 +256,9 @@ except NameError as e:
   print(f"{e=}",file=sys.stderr)
 
 try:
-  BQParam = t.Union[bq.ScalarQueryParameter, bq.ArrayQueryParameter, bq.StructQueryParameter,]
+  BQParam = bq.ScalarQueryParameter | bq.ArrayQueryParameter | bq.StructQueryParameter
   if int(bq.__version__.split(".")[0])>2: BQParam |= bq.RangeQueryParameter
-  def gcp_to_df(qry: str, params:t.List[BQParam] = [], PROJECT:str = '') -> pd.DataFrame:
+  def gcp_to_df(qry: str, params:list[BQParam] = [], PROJECT:str = '') -> pd.DataFrame:
     """Example usage:
     df = gcp_to_df(qry="select * from `bigquery-public-data.idc_v17.dicom_all` where StudyDate=@dt",params=[bq.ScalarQueryParameter("dt","DATE",datetime.date(2010,1,1))],PROJECT="<your-project>")
     """
@@ -278,7 +278,7 @@ try:
     with open(fname,"r") as fd: qry = fd.read()
     df = gcp_to_df(qry, PROJECT=PROJECT)
     return df
-  def gcp_to_polars(qry: str, params:t.List[BQParam]=[], PROJECT:str='') -> pl.DataFrame:
+  def gcp_to_polars(qry: str, params:list[BQParam]=[], PROJECT:str='') -> pl.DataFrame:
     ## NOTE (vijay): This does not work with Interval/Duration types! I get the error "The datatype tin (for IntervalUnit::MonthDayNanon) is still not supported in Rust implementation....see https://arrow.apache.org/rust/src/arrow_schema/ffi.rs.html
     assert PROJECT != '', f"Cannot have empty PROJECT"
     if len(params) > 0:
@@ -352,7 +352,7 @@ def make_dataclass_from_df(df: pd.DataFrame, name_of_dataclass: str="DF"):
   import dataclasses as dc
   return dc.make_dataclass(name_of_dataclass, [(str(c).replace(' ','_'), df[c].dtypes.type) for c in df.columns])
 
-def get_callables_for(o: t.Any) -> t.Dict[str,t.Callable]:
+def get_callables_for(o: t.Any) -> dict[str,t.Callable]:
   """
     >>> pd_funcs = (get_callables_for(pd) | get_callables_for(pd.DataFrame) | get_callables_for(pd.Series))
     >>> df = pd.DataFrame([(name,inspect.signature(func),len(inspect.signature(func).parameters))
@@ -418,7 +418,7 @@ def grep[L: collections.abc.Iterable[T]](regex: str, lst: L, invert=False, ignor
   if invert: return type(lst)(c for c in lst if re.search(regexc, c) is     None)
   return            type(lst)(c for c in lst if re.search(regexc, c) is not None)
 
-def grepl[L: t.Union[list,tuple]](regex: str, lst: L, invert=False, ignorecase=False) -> L:
+def grepl[L: list[T] | tuple[T,...]](regex: str, lst: L, invert=False, ignorecase=False) -> L:
   """
   Like R's grepl function
   >>> grepl("_spend", ['abc', 'xyz_spend', 'abc_spend_xyz'])
