@@ -16,8 +16,6 @@ except ModuleNotFoundError as e: print(f"{e=}", file=sys.stderr)
 try: import hypothesis as hy, hypothesis.strategies as st
 except ModuleNotFoundError as e: print(f"{e=}",file=sys.stderr)
 
-try: import polars as pl
-except ModuleNotFoundError as e: print(f"{e=}",file=sys.stderr)
 
 try: from google.cloud import bigquery as bq
 except ModuleNotFoundError as e: print(f"{e=}",file=sys.stderr)
@@ -240,6 +238,7 @@ def pandas_dataframes(depth=1) -> t.Optional[pd.DataFrame]:
   return result
 
 try:
+  import polars as pl
   def polars_dataframes(depth=1) -> t.Optional[pl.DataFrame]:
     ## frames = [(o,globals()[o]) for o in globals() if isinstance(globals()[o],pl.DataFrame) and o[0] != '_']
     parent = sys._getframe(depth)
@@ -252,7 +251,20 @@ try:
       return None
     result = pl.DataFrame([(n, *d.shape, d.columns,round(d.estimated_size(unit="mb"),2)) for n,d in frames],schema=["df","nr","nc","cols","sz (mb)"], orient="row")
     return result
+
+  def list_dataframes(depth=1) -> t.Optional[pl.DataFrame]:
+    empty_df = pl.DataFrame(data=None,schema={"df":pl.String, "nr": pl.Int64, "nc": pl.Int64, "cols": pl.List(pl.String), "src": pl.String})
+    pd_dfs = pandas_dataframes(depth+1)
+    pl_dfs = polars_dataframes(depth+1)
+    cols = (pl.col("df"),pl.col("nr"),pl.col("nc"),pl.col("cols"))
+    res = empty_df.vstack( (pl_dfs if pl_dfs is not None else empty_df).select(*cols, pl.lit("Polars").alias("src")))
+    res = res.vstack(pl.DataFrame(pd_dfs if pd_dfs is not None else empty_df).select(*cols, pl.lit("Pandas").alias("src")))
+    if res.shape[0] == 0: return None
+    res = res.filter(~pl.col("df").str.starts_with("_"))
+    return res
 except NameError as e:
+  print(f"{e=}",file=sys.stderr)
+except ModuleNotFoundError as e:
   print(f"{e=}",file=sys.stderr)
 
 try:
