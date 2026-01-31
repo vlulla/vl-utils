@@ -239,6 +239,10 @@ def pandas_dataframes(depth=1) -> t.Optional[pd.DataFrame]:
 
 try:
   import polars as pl
+
+  BQParam = bq.ScalarQueryParameter | bq.ArrayQueryParameter | bq.StructQueryParameter
+  if int(bq.__version__.split(".")[0])>2: BQParam |= bq.RangeQueryParameter
+
   def polars_dataframes(depth=1) -> t.Optional[pl.DataFrame]:
     ## frames = [(o,globals()[o]) for o in globals() if isinstance(globals()[o],pl.DataFrame) and o[0] != '_']
     parent = sys._getframe(depth)
@@ -262,6 +266,23 @@ try:
     if res.shape[0] == 0: return None
     res = res.filter(~pl.col("df").str.starts_with("_"))
     return res
+
+  def gcp_to_polars(qry: str, params:list[BQParam]=[], PROJECT:str='') -> pl.DataFrame:
+    ## NOTE (vijay): This does not work with Interval/Duration types! I get the error "The datatype tin (for IntervalUnit::MonthDayNanon) is still not supported in Rust implementation....see https://arrow.apache.org/rust/src/arrow_schema/ffi.rs.html
+    assert PROJECT != '', f"Cannot have empty PROJECT"
+    if len(params) > 0:
+      params_in_qry = [p[1:] for p in re.findall(r"(@[a-zA-Z][a-zA-Z0-9_]*)", qry)]
+      params_names = [p.name for p in params]
+      assert (set(params_names) & set(params_in_qry)) == set(params_in_qry), f"Params in query missing from the params arg: {set(params_in_qry) - set(params_names)}"
+    job_config = bq.QueryJobConfig(query_parameters = params)
+    client = bq.Client(project=PROJECT)
+    df = pl.DataFrame(client.query(qry, job_config=job_config).to_arrow())
+    return df
+
+  def polars_from_bqsql(fname: str, PROJECT: str) -> pl.DataFrame:
+    with open(fname,"r") as fd: qry = fd.read()
+    df = gcp_to_polars(qry, PROJECT=PROJECT)
+    return df
 except NameError as e:
   print(f"{e=}",file=sys.stderr)
 except ModuleNotFoundError as e:
@@ -289,24 +310,6 @@ try:
   def pandas_from_bqsql(fname: str, PROJECT: str) -> pd.DataFrame:
     with open(fname,"r") as fd: qry = fd.read()
     df = gcp_to_df(qry, PROJECT=PROJECT)
-    return df
-  def gcp_to_polars(qry: str, params:list[BQParam]=[], PROJECT:str='') -> pl.DataFrame:
-    ## NOTE (vijay): This does not work with Interval/Duration types! I get the error "The datatype tin (for IntervalUnit::MonthDayNanon) is still not supported in Rust implementation....see https://arrow.apache.org/rust/src/arrow_schema/ffi.rs.html
-    assert PROJECT != '', f"Cannot have empty PROJECT"
-    if len(params) > 0:
-      params_in_qry = [p[1:] for p in re.findall(r"(@[a-zA-Z][a-zA-Z0-9_]*)", qry)]
-      params_names = [p.name for p in params]
-      assert (set(params_names) & set(params_in_qry)) == set(params_in_qry), f"Params in query missing from the params arg: {set(params_in_qry) - set(params_names)}"
-    job_config = bq.QueryJobConfig(query_parameters = params)
-    client = bq.Client(project=PROJECT)
-    ## df = gcp_to_df(qry,params,PROJECT)
-    ## dfp = pl.from_arrow(pa.Table.from_pandas(df)) ## NOTE (vijay): need this because pl.from_pandas(df) cannot read db_dtypes.dbdate datatype!
-    ## return dfp
-    df = pl.DataFrame(client.query(qry, job_config=job_config).to_arrow())
-    return df
-  def polars_from_bqsql(fname: str, PROJECT: str) -> pl.DataFrame:
-    with open(fname,"r") as fd: qry = fd.read()
-    df = gcp_to_polars(qry, PROJECT=PROJECT)
     return df
 except NameError as e:
   print(f"{e=}",file=sys.stderr)
