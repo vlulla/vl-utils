@@ -257,12 +257,12 @@ try:
     return result
 
   def list_dataframes(depth=1) -> t.Optional[pl.DataFrame]:
-    empty_df = pl.DataFrame(data=None,schema={"df":pl.String, "nr": pl.Int64, "nc": pl.Int64, "cols": pl.List(pl.String), "src": pl.String})
+    empty_df = pl.DataFrame(data=None,schema={"df":pl.String, "nr": pl.Int64, "nc": pl.Int64, "cols": pl.List(pl.String), "df_type": pl.String})
     pd_dfs = pandas_dataframes(depth+1)
     pl_dfs = polars_dataframes(depth+1)
     cols = (pl.col("df"),pl.col("nr"),pl.col("nc"),pl.col("cols"))
-    res = empty_df.vstack( (pl_dfs if pl_dfs is not None else empty_df).select(*cols, pl.lit("Polars").alias("src")))
-    res = res.vstack(pl.DataFrame(pd_dfs if pd_dfs is not None else empty_df).select(*cols, pl.lit("Pandas").alias("src")))
+    res = empty_df.vstack( (pl_dfs if pl_dfs is not None else empty_df).select(*cols, pl.lit("Polars").alias("df_type")))
+    res = res.vstack(pl.DataFrame(pd_dfs if pd_dfs is not None else empty_df).select(*cols, pl.lit("Pandas").alias("df_type")))
     if res.shape[0] == 0: return None
     res = res.filter(~pl.col("df").str.starts_with("_"))
     return res
