@@ -256,7 +256,7 @@ try:
     result = pl.DataFrame([(n, *d.shape, d.columns,round(d.estimated_size(unit="mb"),2)) for n,d in frames],schema=["df","nr","nc","cols","sz (mb)"], orient="row")
     return result
 
-  def list_dataframes(depth=1) -> t.Optional[pl.DataFrame]:
+  def list_dataframes(depth=1, exclude_hidden=True) -> t.Optional[pl.DataFrame]:
     empty_df = pl.DataFrame(data=None,schema={"df":pl.String, "nr": pl.Int64, "nc": pl.Int64, "cols": pl.List(pl.String), "df_type": pl.String})
     pd_dfs = pandas_dataframes(depth+1)
     pl_dfs = polars_dataframes(depth+1)
@@ -264,7 +264,8 @@ try:
     res = empty_df.vstack( (pl_dfs if pl_dfs is not None else empty_df).select(*cols, pl.lit("Polars").alias("df_type")))
     res = res.vstack(pl.DataFrame(pd_dfs if pd_dfs is not None else empty_df).select(*cols, pl.lit("Pandas").alias("df_type")))
     if res.shape[0] == 0: return None
-    res = res.filter(~pl.col("df").str.starts_with("_"))
+    if exclude_hidden:
+      res = res.filter(~pl.col("df").str.starts_with("_"))
     return res
 
   def gcp_to_polars(qry: str, params:list[BQParam]=[], PROJECT:str='') -> pl.DataFrame:
