@@ -240,9 +240,6 @@ def pandas_dataframes(depth=1) -> t.Optional[pd.DataFrame]:
 try:
   import polars as pl
 
-  BQParam = bq.ScalarQueryParameter | bq.ArrayQueryParameter | bq.StructQueryParameter
-  if int(bq.__version__.split(".")[0])>2: BQParam |= bq.RangeQueryParameter
-
   def polars_dataframes(depth=1) -> t.Optional[pl.DataFrame]:
     ## frames = [(o,globals()[o]) for o in globals() if isinstance(globals()[o],pl.DataFrame) and o[0] != '_']
     parent = sys._getframe(depth)
@@ -267,6 +264,9 @@ try:
     if exclude_hidden:
       res = res.filter(~pl.col("df").str.starts_with("_"))
     return res
+
+  BQParam = bq.ScalarQueryParameter | bq.ArrayQueryParameter | bq.StructQueryParameter
+  if int(bq.__version__.split(".")[0])>2: BQParam |= bq.RangeQueryParameter
 
   def gcp_to_polars(qry: str, params:list[BQParam]=[], PROJECT:str='') -> pl.DataFrame:
     ## NOTE (vijay): This does not work with Interval/Duration types! I get the error "The datatype tin (for IntervalUnit::MonthDayNanon) is still not supported in Rust implementation....see https://arrow.apache.org/rust/src/arrow_schema/ffi.rs.html
