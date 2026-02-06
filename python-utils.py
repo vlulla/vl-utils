@@ -181,6 +181,24 @@ def repeat(x: T, n: int = 1) -> list[T]:
   assert isinstance(n,int) and n > 0
   return [x for _ in range(n)]
 
+def replicate(n: int, fn:t.Callable, /, *args, **kwargs):
+  """
+  Trying to replicate R's replicate functionality.
+  >>> def initials(n:int = 2): return ''.join(random.choices(string.ascii_lowercase, k=n))
+  >>> a = list(replicate(5, initials))
+  >>> b = list(replicate(5, initials, 3))
+  >>> c = tuple(replicate(5, initials, 5))
+  >>> df = pl.DataFrame({"id": range(1,11), "inits": replicate(10, initials), "rnd": [random.randint(0,50) for _ in range(10)]})
+
+  TODO (vijay): figure out if this fn idiom works with position only (*args here) and keyword arguments (**kwargs here) in all instances!
+
+  Since python does not have R's lazy argument evaluation, it is not possible to have expressions for either args or kwargs.
+  """
+  assert isinstance(n, numbers.Number)
+  n = int(abs(n))
+  for i in range(n):
+    yield fn(*args, **kwargs)
+
 def genrandstr(n: int = 5, lowercase=False) -> str:
   " >>> [genrandstr(random.randint(2,8)) for _ in range(random.randint(5,10))] "
 
