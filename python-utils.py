@@ -6,7 +6,7 @@
 ## bash $ uv run example.py
 ## bash $ uv run --python 3.10 example.py # to use specific version of python
 ##
-import re, typing as t, inspect, collections, random, sys, dataclasses as dc,math,decimal, fractions, numbers
+import re, typing as t, inspect, collections, random, sys, dataclasses as dc,math,decimal, fractions, numbers, itertools
 import numpy as np, pandas as pd
 import functools,operator
 
@@ -96,9 +96,7 @@ def nrange(xs: collections.abc.Iterable[T]) -> tuple[T,T]: # mnemonic: numeric r
 def cumsum(xs: collections.abc.Iterable[T]) -> collections.abc.Iterable[T]:
   assert isiterable(xs)
   assert all(isnumeric(x) for x in xs), "Non numeric value found"
-  s=[sum(xs[:i+1]) for i in range(len(xs))]
-  assert sum(xs) == s[-1]
-  return type(xs)(s) ## does not work with np.ndarrays! Use cumsum(list(ndarr)) instead
+  return type(xs)(itertools.accumulate(xs)) ## does not work with np.ndarray! Use cumsum(list(ndarray))
 def freq(xs: collections.abc.Iterable) -> collections.Counter:
   """
   >>> freq('mississippi') # similar to pandas.value_counts
@@ -522,7 +520,6 @@ def make_param_grid(param: dict) -> pd.DataFrame:
   """
   assert isinstance(param, dict)
   assert all(isinstance(v, list) for v in param.values())
-  import itertools
   df = pd.DataFrame(itertools.product(*param.values()),columns=param)
   assert df.shape == (np.prod([len(_) for _ in param.values()]), len(param))
   return df
@@ -554,22 +551,22 @@ def splitarray(xs: collections.abc.Iterable[T], stride:int) -> collections.abc.I
   >>> l10 = list(range(10))
   >>> l9 = l10[:9]
   >>> s = "abcdefghij"
-  >>> splitarray(l10,3) # [[0,1,2],[3,4,5],[6,7,8],[9]]
+  >>> splitarray(l10,3) # [(0,1,2),(3,4,5),(6,7,8),(9)]
   >>> splitarray(tuple(l9),3) # ((0,1,2),(3,4,5),(6,7,8))
   >>> splitarray(s,3) # ['abc','def','ghi','j']
   >>> splitarray(s[:9],3) # ['abc','def','ghi']
   >>> splitarray([],15) # ought to handle strange cases correctly...
   >>> splitarray("abc",5) # ["abc"]
   >>> splitarray("abc",1) # ["a","b","c"]
-  >>> splitarray(tuple(l9),2) ((0,1),(2,3),(4,5),(6,7),(8,))
+  >>> splitarray(tuple(l9),2) # ((0,1),(2,3),(4,5),(6,7),(8,))
   """
   if xs=='': return ['']
   assert stride > 0, "Cannot have -ve stride!"
-  idxs = [(stride*_,(stride*_)+stride) for _ in range(len(xs)//stride)] + ([(stride*(len(xs)//stride),None)] if len(xs)%stride!=0 else [])
+  l = itertools.batched(xs, stride)
   if isinstance(xs, str):
-    ret =          [type(xs)(xs[_[0]:_[-1]]) for _ in idxs]
+    ret = ["".join(_) for _ in l]
   else:
-    ret = type(xs)([type(xs)(xs[_[0]:_[-1]]) for _ in idxs])
+    ret = type(xs)(l)
   return ret
 
 ## @hy.given(st.lists(st.integers()|st.floats())|st.text(),st.integers(min_value=1))
