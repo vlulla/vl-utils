@@ -281,8 +281,7 @@ try:
       res = res.filter(~pl.col("df").str.starts_with("_"))
     return res
 
-  BQParam = bq.ScalarQueryParameter | bq.ArrayQueryParameter | bq.StructQueryParameter
-  if int(bq.__version__.split(".")[0])>2: BQParam |= bq.RangeQueryParameter
+  type BQParam = bq.ScalarQueryParameter | bq.ArrayQueryParameter | bq.StructQueryParameter | bq.RangeQueryParameter
 
   def gcp_to_polars(qry: str, params:list[BQParam]=[], PROJECT:str='') -> pl.DataFrame:
     ## NOTE (vijay): This does not work with Interval/Duration types! I get the error "The datatype tin (for IntervalUnit::MonthDayNanon) is still not supported in Rust implementation....see https://arrow.apache.org/rust/src/arrow_schema/ffi.rs.html
@@ -306,8 +305,7 @@ except ModuleNotFoundError as e:
   print(f"{e=}",file=sys.stderr)
 
 try:
-  BQParam = bq.ScalarQueryParameter | bq.ArrayQueryParameter | bq.StructQueryParameter
-  if int(bq.__version__.split(".")[0])>2: BQParam |= bq.RangeQueryParameter
+  type BQParam = bq.ScalarQueryParameter | bq.ArrayQueryParameter | bq.StructQueryParameter | bq.RangeQueryParameter
   def gcp_to_df(qry: str, params:list[BQParam] = [], PROJECT:str = '') -> pd.DataFrame:
     """Example usage:
     df = gcp_to_df(qry="select * from `bigquery-public-data.idc_v17.dicom_all` where StudyDate=@dt",params=[bq.ScalarQueryParameter("dt","DATE",datetime.date(2010,1,1))],PROJECT="<your-project>")
