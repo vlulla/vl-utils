@@ -602,7 +602,7 @@ def install_packages(pkgs: str | list[str]) -> None:
   >>> install_packages("prophet")
   >>> install_packages(["numpyro", "pymc", "prophet"])
   """
-  import sys, subprocess
+  import sys, subprocess, importlib
   if isinstance(pkgs, str): pkgs = [pkgs]
   cmd = [sys.executable, "-m", "pip", "list"]
   with subprocess.Popen(cmd, stdout=subprocess.PIPE) as proc:
@@ -616,6 +616,7 @@ def install_packages(pkgs: str | list[str]) -> None:
     subprocess.run(cmd, check=True)
   else:
     print(f"{pkgs=} already installed!")
+  importlib.invalidate_caches() ## Need this to ensure that finders notice new modules that are installed while the interpreter is running
 
 ## Like R's source function
 def source(fname: str) -> None:
