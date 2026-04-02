@@ -357,11 +357,11 @@ def df_coltypes(df: T) -> T:
   assert isinstance(df, (pd.DataFrame, pl.DataFrame))
   typ = type(df)
   if typ == pd.DataFrame:
-    cols_with_attrs = [(i,c,f"{str(df[c].dtype)}",df[c].nunique(),df[c].isna().sum(),100*df[c].isna().sum()/df.shape[0]) for i,c in enumerate(df.columns)]
-    ret = pd.DataFrame(cols_with_attrs, columns=["colidx", "colname", "coltype", "nunique", "numna", "pctna"])
+    cols_with_attrs = [(i,c,f"{str(df[c].dtype)}",df[c].nunique(),100*df[c].nunique()/df.shape[0],df[c].isna().sum(),100*df[c].isna().sum()/df.shape[0]) for i,c in enumerate(df.columns)]
+    ret = pd.DataFrame(cols_with_attrs, columns=["colidx", "colname", "coltype", "nunique", "pctunique", "numna", "pctna"])
   elif typ == pl.DataFrame:
-    cols_with_attrs = [(i,c,f"{str(df[c].dtype)}",df[c].n_unique(),df[c].null_count(),100*df[c].null_count()/df.shape[0]) for i,c in enumerate(df.columns)]
-    ret = pl.DataFrame( cols_with_attrs,schema=["colidx","colname","coltype","nunique","numna","pctna"], orient="row")
+    cols_with_attrs = [(i,c,f"{str(df[c].dtype)}",df[c].n_unique(),100*df[c].n_unique()/df.shape[0],df[c].null_count(),100*df[c].null_count()/df.shape[0]) for i,c in enumerate(df.columns)]
+    ret = pl.DataFrame( cols_with_attrs,schema=["colidx","colname","coltype","nunique","pctunique","numna","pctna"], orient="row")
   return ret
 
 def make_dataclass_from_df(df: pd.DataFrame, name_of_dataclass: str="DF"):
