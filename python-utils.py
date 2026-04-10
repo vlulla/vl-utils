@@ -7,8 +7,10 @@
 ## bash $ uv run --python 3.10 example.py # to use specific version of python
 ##
 import re, typing as t, inspect, collections, random, sys, dataclasses as dc,math,decimal, fractions, numbers, itertools
-import numpy as np, pandas as pd
 import functools,operator
+
+try: import numpy as np, pandas as pd
+except ModuleNotFoundError as e: print(f"{e=}", file=sys.stderr)
 
 try: import jax.numpy as jnp
 except ModuleNotFoundError as e: print(f"{e=}", file=sys.stderr)
@@ -88,7 +90,7 @@ def isnumeric(x): return isinstance(x, numbers.Number)
 ##   assert isiterable(xs), "Not an iterable"
 ##   assert all(isnumeric(x) for x in xs), "Non numeric value found"
 ##   return sum(xs)/len(xs)
-mean = average = avg = np.mean
+## mean = average = avg = np.mean
 def nrange(xs: collections.abc.Iterable[T]) -> tuple[T,T]: # mnemonic: numeric range?
   assert isiterable(xs)
   assert all(isnumeric(x) for x in xs), "Non numeric value found"
