@@ -411,13 +411,14 @@ def get_callables_for(o: t.Any) -> dict[str,t.Callable]:
   """
   return {f"{o.__name__}.{fname}": getattr(o,fname) for fname in dir(o) if callable(getattr(o,fname))}
 
-def grid(axis="both"):
+def grid(axis: typing.Literal["both","x","y"]="both") -> None:
   ## Neat idea from https://github.com/norvig/pytudes/blob/main/ipynb/BikeCode.ipynb
   import matplotlib.pyplot as plt
   ## plt.rcParams['figure.figsize'] = (12, 6)
   plt.minorticks_on()
   plt.grid(which="major", ls="-", alpha=3/4, axis=axis)
   plt.grid(which="minor", ls=":", alpha=1/2, axis=axis)
+  return None
 
 
 def grep[L: collections.abc.Iterable[T]](regex: str, lst: L, invert=False, ignorecase=False) -> L:
