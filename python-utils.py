@@ -6,7 +6,7 @@
 ## bash $ uv run example.py
 ## bash $ uv run --python 3.10 example.py # to use specific version of python
 ##
-import re, typing, inspect, collections, random, sys, dataclasses as dc,math,decimal, fractions, numbers, itertools
+import re, typing as t, inspect, collections, random, sys, dataclasses as dc,math,decimal, fractions, numbers, itertools
 import functools,operator
 
 try: import numpy as np, pandas as pd
@@ -63,7 +63,7 @@ def fix_colnames(colname: str, normalize_adjacent_uppers: bool = True) -> str:
   return fixed_colname
 
 
-T = typing.TypeVar("T")
+T = t.TypeVar("T")
 def identity(x: T) -> T: return x ## surprisingly useful!
 
 ## ## @hy.settings(max_examples=500) # more thorough but slower
@@ -411,7 +411,7 @@ def get_callables_for(o: t.Any) -> dict[str,t.Callable]:
   """
   return {f"{o.__name__}.{fname}": getattr(o,fname) for fname in dir(o) if callable(getattr(o,fname))}
 
-def grid(axis: typing.Literal["both","x","y"]="both") -> None:
+def grid(axis: t.Literal["both","x","y"]="both") -> None:
   ## Neat idea from https://github.com/norvig/pytudes/blob/main/ipynb/BikeCode.ipynb
   import matplotlib.pyplot as plt
   ## plt.rcParams['figure.figsize'] = (12, 6)
