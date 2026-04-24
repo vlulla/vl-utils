@@ -6,7 +6,7 @@
 ## bash $ uv run example.py
 ## bash $ uv run --python 3.10 example.py # to use specific version of python
 ##
-import re, typing as t, inspect, collections, random, sys, dataclasses as dc,math,decimal, fractions, numbers, itertools
+import re, typing, inspect, collections, random, sys, dataclasses as dc,math,decimal, fractions, numbers, itertools
 import functools,operator
 
 try: import numpy as np, pandas as pd
