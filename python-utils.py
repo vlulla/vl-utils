@@ -63,7 +63,7 @@ def fix_colnames(colname: str, normalize_adjacent_uppers: bool = True) -> str:
   return fixed_colname
 
 
-T = t.TypeVar("T")
+T = typing.TypeVar("T")
 def identity(x: T) -> T: return x ## surprisingly useful!
 
 ## ## @hy.settings(max_examples=500) # more thorough but slower
