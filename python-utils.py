@@ -654,7 +654,7 @@ def fit_normal(data, bins=10, title=None) -> None:
 
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(14,8))
     ax.hist(data, bins=bins, density=True)
-    start, end = starts.norm.ppf([0.001, 0.999], loc=loc, scale=scale)
+    start, end = stats.norm.ppf([0.001, 0.999], loc=loc, scale=scale)
     x = np.linspace(start, end, 100)
     ax.plot(x, stats.norm.pdf(x, loc=loc, scale=scale))
     if title: ax.set_title(str(title))
