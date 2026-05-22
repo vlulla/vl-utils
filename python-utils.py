@@ -627,6 +627,40 @@ def source(fname: str) -> None:
         code = compile(fd.read(), fname, "exec")
         exec(code)
 
+def fit_gamma(data, bins=10, title=None) -> None:
+    import math, numpy as np, matplotlib, matplotlib.pyplot as plt, scipy.stats as stats
+    if any(x<0 for x in data): raise ValueError("Gamma function only works for +ve values.")
+    assert all(attr in dir(data) for attr in ("min", "max"))
+
+    bounds = [(min(0, data.min()), math.ceil(data.max()*1.5))]
+    a, loc, scale = stats.fit(stats.gamma, data=data, bounds=bounds).params
+
+    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(14,8))
+    ax.hist(data, bins=bins, density=True)
+    start, end = stats.gamma.ppf([0.001, 0.999], a)
+    x = np.linspace(start, end, 100)
+    ax.plot(x, stats.gamma.pdf(x, a))
+    if title: ax.set_title(str(title))
+    grid() ## defined above
+    plt.show()
+
+    return None
+
+def fit_normal(data, bins=10, title=None) -> return None:
+    import math, numpy as np, matplotlib, matplotlib.pyplot as plt, scipy.stats as stats
+
+    bounds = [(data.min(), data.max()), (data.mean() - (3*data.std()), data.mean() + (3*data.std()))]
+    loc, scale = stats.fit(stats.norm, data=data, bounds=bounds).params
+
+    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(14,8))
+    ax.hist(data, bins=bins, density=True)
+    start, end = starts.norm.ppf([0.001, 0.999], loc=loc, scale=scale)
+    x = np.linspace(start, end, 100)
+    ax.plot(x, stats.norm.pdf(x, loc=loc, scale=scale))
+    if title: ax.set_title(str(title))
+    grid()
+    plt.show()
+
 ## some aliases ... especially useful in repl
 def print_source(o): print(get_source(o))
 print_src, get_src = print_source, get_source
