@@ -416,8 +416,8 @@ def grid(axis: t.Literal["both","x","y"]="both") -> None:
   import matplotlib.pyplot as plt
   ## plt.rcParams['figure.figsize'] = (12, 6)
   plt.minorticks_on()
-  plt.grid(which="major", ls="-", alpha=3/4, axis=axis)
-  plt.grid(which="minor", ls=":", alpha=1/2, axis=axis)
+  plt.grid(which="major", ls="-", alpha=1/4, axis=axis)
+  plt.grid(which="minor", ls=":", alpha=1/8, axis=axis)
   return None
 
 
