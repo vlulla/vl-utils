@@ -632,7 +632,7 @@ def fit_gamma(data, bins=10, title=None) -> None:
     if any(x<0 for x in data): raise ValueError("Gamma function only works for +ve values.")
     assert all(attr in dir(data) for attr in ("min", "max"))
 
-    bounds = [(min(0, data.min()), math.ceil(data.max()*1.5))]
+    bounds = {"a": (0, max(data.max(), 1e9))} ## gamma's support is [0, inf)!
     a, loc, scale = stats.fit(stats.gamma, data=data, bounds=bounds).params
 
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(14,8))
