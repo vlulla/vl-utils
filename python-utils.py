@@ -649,7 +649,7 @@ def fit_gamma(data, bins=10, title=None) -> None:
 def fit_normal(data, bins=10, title=None) -> None:
     import math, numpy as np, matplotlib, matplotlib.pyplot as plt, scipy.stats as stats
 
-    bounds = [(data.min(), data.max()), (data.mean() - (3*data.std()), data.mean() + (3*data.std()))]
+    bounds = {"loc":(data.min(), data.max()), "scale": (data.std(), data.std())} ## fix the scale parameter!
     loc, scale = stats.fit(stats.norm, data=data, bounds=bounds).params
 
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(14,8))
