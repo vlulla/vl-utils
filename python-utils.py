@@ -628,6 +628,11 @@ def source(fname: str) -> None:
         exec(code)
 
 def fit_gamma(data, bins=10, title=None) -> None:
+    """
+    >>> d = scipy.stats.norm.rvs(loc=68.2, scale=15.32, size=1_000)
+    >>> fit_gamma(d)
+    >>> fit_gamma(d, bins=20)
+    """
     import math, numpy as np, matplotlib, matplotlib.pyplot as plt, scipy.stats as stats
     if any(x<0 for x in data): raise ValueError("Gamma function only works for +ve values.")
     assert all(attr in dir(data) for attr in ("min", "max", "shape", "mean", "std"))
@@ -647,6 +652,11 @@ def fit_gamma(data, bins=10, title=None) -> None:
     return None
 
 def fit_normal(data, bins=10, title=None) -> None:
+    """
+    >>> d = scipy.stats.norm.rvs(loc=68.2, scale=15.32, size=1_000)
+    >>> fit_normal(d)
+    >>> fit_normal(d, bins=20)
+    """
     import math, numpy as np, matplotlib, matplotlib.pyplot as plt, scipy.stats as stats
     assert all(attr in dir(data) for attr in ("min", "max", "shape", "mean", "std"))
 
