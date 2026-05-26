@@ -630,7 +630,7 @@ def source(fname: str) -> None:
 def fit_gamma(data, bins=10, title=None) -> None:
     import math, numpy as np, matplotlib, matplotlib.pyplot as plt, scipy.stats as stats
     if any(x<0 for x in data): raise ValueError("Gamma function only works for +ve values.")
-    assert all(attr in dir(data) for attr in ("min", "max"))
+    assert all(attr in dir(data) for attr in ("min", "max", "shape", "mean", "std"))
 
     bounds = {"a": (0, max(data.max(), 1e9))} ## gamma's support is [0, inf)!
     a, loc, scale = stats.fit(stats.gamma, data=data, bounds=bounds).params
@@ -648,6 +648,7 @@ def fit_gamma(data, bins=10, title=None) -> None:
 
 def fit_normal(data, bins=10, title=None) -> None:
     import math, numpy as np, matplotlib, matplotlib.pyplot as plt, scipy.stats as stats
+    assert all(attr in data for attr in ("min", "max", "shape", "mean", "std"))
 
     bounds = {"loc":(data.min(), data.max()), "scale": (data.std(), data.std())} ## fix the scale parameter!
     loc, scale = stats.fit(stats.norm, data=data, bounds=bounds).params
