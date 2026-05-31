@@ -1,12 +1,12 @@
 #!/usr/bin/env -S uv run --script
 # /// script
-# dependencies = ["numpy","pyarrow","pandas","hypothesis","polars","duckdb",]
+# dependencies = ["numpy","pyarrow","pandas","hypothesis","polars","duckdb","torch","einops"]
 # ///
 ##
 ## bash $ uv run example.py
 ## bash $ uv run --python 3.10 example.py # to use specific version of python
 ##
-import re, typing as t, inspect, collections, random, sys, dataclasses as dc,math,decimal, fractions, numbers, itertools
+import re, typing as ty, inspect, collections, random, sys, dataclasses as dc,math,decimal, fractions, numbers, itertools
 import functools,operator
 
 try: import numpy as np, pandas as pd
@@ -26,6 +26,9 @@ try: import duckdb as ddb
 except ModuleNotFoundError as e: print(f"{e=}", file=sys.stderr)
 
 try: import pyarrow as pa
+except ModuleNotFoundError as e: print(f"{e=}", file=sys.stderr)
+
+try: import torch as t, einops as eo
 except ModuleNotFoundError as e: print(f"{e=}", file=sys.stderr)
 
 def fix_colnames(colname: str, normalize_adjacent_uppers: bool = True) -> str:
@@ -63,7 +66,7 @@ def fix_colnames(colname: str, normalize_adjacent_uppers: bool = True) -> str:
   return fixed_colname
 
 
-T = t.TypeVar("T")
+T = ty.TypeVar("T")
 def identity(x: T) -> T: return x ## surprisingly useful!
 
 ## ## @hy.settings(max_examples=500) # more thorough but slower
@@ -181,7 +184,7 @@ def repeat(x: T, n: int = 1) -> list[T]:
   assert isinstance(n,int) and n > 0
   return [x for _ in range(n)]
 
-def replicate(n: int, fn:t.Callable, /, *args, **kwargs):
+def replicate(n: int, fn:ty.Callable, /, *args, **kwargs):
   """
   Trying to replicate R's replicate functionality.
   >>> def initials(n:int = 2): return ''.join(random.choices(string.ascii_lowercase, k=n))
@@ -239,7 +242,7 @@ def rangealong(l: collections.abc.Iterable) -> collections.abc.Iterable:
   return range(len(l))
 
 
-def pandas_dataframes(depth=1) -> t.Optional[pd.DataFrame]:
+def pandas_dataframes(depth=1) -> ty.Optional[pd.DataFrame]:
   ## frames = [(o,globals()[o]) for o in globals() if isinstance(globals()[o], pd.DataFrame) and o[0] != '_']
   parent = sys._getframe(depth)
   frames = tuple(
@@ -258,7 +261,7 @@ def pandas_dataframes(depth=1) -> t.Optional[pd.DataFrame]:
 try:
   import polars as pl
 
-  def polars_dataframes(depth=1) -> t.Optional[pl.DataFrame]:
+  def polars_dataframes(depth=1) -> ty.Optional[pl.DataFrame]:
     ## frames = [(o,globals()[o]) for o in globals() if isinstance(globals()[o],pl.DataFrame) and o[0] != '_']
     parent = sys._getframe(depth)
     frames = tuple(
@@ -271,7 +274,7 @@ try:
     result = pl.DataFrame([(n, *d.shape, d.columns,round(d.estimated_size(unit="mb"),2)) for n,d in frames],schema=["df","nr","nc","cols","sz (mb)"], orient="row")
     return result
 
-  def list_dataframes(depth=1, exclude_hidden=True) -> t.Optional[pl.DataFrame]:
+  def list_dataframes(depth=1, exclude_hidden=True) -> ty.Optional[pl.DataFrame]:
     empty_df = pl.DataFrame(data=None,schema={"df":pl.String, "nr": pl.Int64, "nc": pl.Int64, "cols": pl.List(pl.String), "df_type": pl.String})
     pd_dfs = pandas_dataframes(depth+1)
     pl_dfs = polars_dataframes(depth+1)
@@ -331,7 +334,7 @@ try:
 except NameError as e:
   print(f"{e=}",file=sys.stderr)
 
-def calculate_woe(df: pd.DataFrame, feature: str, target: str, zeroadjust=True) -> t.Tuple[pd.DataFrame, float]:
+def calculate_woe(df: pd.DataFrame, feature: str, target: str, zeroadjust=True) -> ty.Tuple[pd.DataFrame, float]:
   ## https://documentation.sas.com/doc/en/vdmmlcdc/8.1/casstat/viyastat_binning_details02.htm
   ## https://www.google.com/search?q=weight+of+evidence
 
@@ -384,7 +387,7 @@ def make_dataclass_from_df(df: pd.DataFrame, name_of_dataclass: str="DF"):
   import dataclasses as dc
   return dc.make_dataclass(name_of_dataclass, [(str(c).replace(' ','_'), df[c].dtypes.type) for c in df.columns])
 
-def get_callables_for(o: t.Any) -> dict[str,t.Callable]:
+def get_callables_for(o: ty.Any) -> dict[str,ty.Callable]:
   """
     >>> pd_funcs = (get_callables_for(pd) | get_callables_for(pd.DataFrame) | get_callables_for(pd.Series))
     >>> df = pd.DataFrame([(name,inspect.signature(func),len(inspect.signature(func).parameters))
@@ -411,7 +414,7 @@ def get_callables_for(o: t.Any) -> dict[str,t.Callable]:
   """
   return {f"{o.__name__}.{fname}": getattr(o,fname) for fname in dir(o) if callable(getattr(o,fname))}
 
-def grid(axis: t.Literal["both","x","y"]="both") -> None:
+def grid(axis: ty.Literal["both","x","y"]="both") -> None:
   ## Neat idea from https://github.com/norvig/pytudes/blob/main/ipynb/BikeCode.ipynb
   import matplotlib.pyplot as plt
   ## plt.rcParams['figure.figsize'] = (12, 6)
@@ -495,7 +498,7 @@ def gsub[L: list[str] | set[str] | tuple[str]](regex: str, repl: str, lst: str |
   if isinstance(lst, str): return _gsub(regex, repl, lst)
   return type(lst)(_gsub(regex, repl, c) for c in lst)
 
-P = t.ParamSpec('P')
+P = ty.ParamSpec('P')
 def negate(pred: collections.abc.Callable[P, bool]) -> collections.abc.Callable[P, bool]:
   """
   This is useful for filter. And, it is also like itertools.filterfalse
@@ -671,6 +674,26 @@ def fit_normal(data, bins=10, title=None) -> None:
     if title: ax.set_title(str(title))
     grid()
     plt.show()
+
+def pad(arr: np.ndarray, multipleof: int=12, padval=None) -> np.ndarray:
+    """
+    >>> pad(np.arange(5), multipleof=12)
+    >>> pad(np.arange(3)/1, multipleof=4, padval=np.nan) ## padval can raise problems with mixing dtypes!
+
+    Only works with 1-d numpy arrays!
+    """
+    assert isinstance(multipleof, int) and multipleof>0, f"{multipleof =}"
+    assert len(arr.shape)==1, f"{arr.shape =}"
+    dtype = arr.dtype
+    arrlen = len(arr)
+    offset = 0 if arrlen / multipleof == arrlen // multipleof else 1
+    reslen = multipleof * (offset + (arrlen // multipleof))
+    padlen = reslen - len(arr)
+    padding = np.zeros(padlen, dtype=dtype)
+    if padval:
+        padding += padval
+    res = np.concat([arr, padding])
+    return res
 
 ## some aliases ... especially useful in repl
 def print_source(o): print(get_source(o))
