@@ -10,7 +10,7 @@ create or replace macro yearqtr(x) as (select (year(x::date)*10)+quarter(x::date
 create or replace macro calendar_between_dates(start_date,end_date) as table (
 with
   dates as (select unnest(generate_series(start_date::date,end_date::date,interval 1 day)::date[])::date as dt)
-, dates_with_attrs as (select dt,year(dt) as YYYY, month(dt) as MM, extract(day from dt) as DD, dayofmonth(dt) as DOM, weekofyear(dt) as WOY, yearweek(dt) as ISOYYYYWK, extract(weekday from dt) as dow,strftime(dt,'%a') as dow_n, isodow(dt) as ISODOW, dayofweek(dt) as dow_num, quarter(dt) as Q,YYYY||''||Q as YYYYQ from dates)
+, dates_with_attrs as (select dt,year(dt) as YYYY, month(dt) as MM, extract(day from dt) as DD, dayofyear(dt) as DOY, dayofmonth(dt) as DOM, weekofyear(dt) as WOY, yearweek(dt) as ISOYYYYWK, extract(weekday from dt) as dow,strftime(dt,'%a') as dow_n, isodow(dt) as ISODOW, dayofweek(dt) as dow_num, quarter(dt) as Q,YYYY||''||Q as YYYYQ from dates)
 , dates_with_attrs_with_ordinals as (select *,row_number() OVER (yearmonweekday order by dt) as nth_dow from dates_with_attrs window yearmonweekday as (partition by YYYY,MM,dow))
 select * exclude(holiday)
 , case
