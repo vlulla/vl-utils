@@ -358,7 +358,7 @@ def calculate_woe(df: pd.DataFrame, feature: str, target: str, zeroadjust=True) 
   iv = (((dset['NonEvent']/TotNonEvent) - (dset['Event']/TotEvent)) * dset['WoE']).sum()
   return dset.loc[:,['FeatVal','WoE']], iv
 
-def df_coltypes(df: T) -> T:
+def df_coltypes[T: (pd.DataFrame, pl.DataFrame)](df: T) -> T:
   assert isinstance(df, (pd.DataFrame, pl.DataFrame))
   typ = type(df)
   if typ == pd.DataFrame:
