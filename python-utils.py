@@ -705,7 +705,6 @@ def list_module_methods(m) -> pl.DataFrame:
     """
     assert type(m) == type(sys) ##
     callables = list(_ for _ in dir(m) if callable(getattr(m, _)) and _[0] != '_')
-    breakpoint()
     assert len(callables)>0
     callables_args = []
     try: ## Need this because despite polars.col being callable, it raises exception for python's inspect module!
