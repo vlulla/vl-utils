@@ -695,6 +695,28 @@ def pad(arr: np.ndarray, multipleof: int=12, padval=None) -> np.ndarray:
     res = np.concat([arr, padding])
     return res
 
+def list_module_methods(m) -> pl.DataFrame:
+    """
+    >>> list_module_methods(pd)
+    >>> list_module_methods(pl)
+    >>> list_module_methods(np)
+
+    This is something like R's excellent `ls.str` function!
+    """
+    assert type(m) == type(sys) ##
+    callables = list(_ for _ in dir(m) if callable(getattr(m, _)) and _[0] != '_')
+    breakpoint()
+    assert len(callables)>0
+    callables_args = []
+    try: ## Need this because despite polars.col being callable, it raises exception for python's inspect module!
+        for c in callables:
+            a = args(getattr(m,c))
+            callables_args.append(f"{m.__name__}.{c}{a}")
+    except TypeError as e:
+        print(f"{e =}", file=sys.stderr)
+    assert len(callables_args)>0
+    return pl.DataFrame({f"{m.__name__} signatures": callables_args})
+
 ## some aliases ... especially useful in repl
 def print_source(o): print(get_source(o))
 print_src, get_src = print_source, get_source
