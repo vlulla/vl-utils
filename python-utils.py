@@ -1,6 +1,6 @@
 #!/usr/bin/env -S uv run --script
 # /// script
-# dependencies = ["numpy","pyarrow","pandas","hypothesis","polars","duckdb","torch","einops"]
+# dependencies = ["duckdb","einops","hypothesis","numpy","pandas","polars","pyarrow","torch"]
 # ///
 ##
 ## bash $ uv run example.py
@@ -242,7 +242,7 @@ def rangealong(l: collections.abc.Iterable) -> collections.abc.Iterable:
   return range(len(l))
 
 
-def pandas_dataframes(depth=1) -> ty.Optional[pd.DataFrame]:
+def pandas_dataframes(depth:int =1) -> pd.DataFrame | None:
   ## frames = [(o,globals()[o]) for o in globals() if isinstance(globals()[o], pd.DataFrame) and o[0] != '_']
   parent = sys._getframe(depth)
   frames = tuple(
@@ -261,7 +261,7 @@ def pandas_dataframes(depth=1) -> ty.Optional[pd.DataFrame]:
 try:
   import polars as pl
 
-  def polars_dataframes(depth=1) -> ty.Optional[pl.DataFrame]:
+  def polars_dataframes(depth: int=1) -> pl.DataFrame | None:
     ## frames = [(o,globals()[o]) for o in globals() if isinstance(globals()[o],pl.DataFrame) and o[0] != '_']
     parent = sys._getframe(depth)
     frames = tuple(
@@ -274,7 +274,7 @@ try:
     result = pl.DataFrame([(n, *d.shape, d.columns,round(d.estimated_size(unit="mb"),2)) for n,d in frames],schema=["df","nr","nc","cols","sz (mb)"], orient="row")
     return result
 
-  def list_dataframes(depth=1, exclude_hidden=True) -> ty.Optional[pl.DataFrame]:
+  def list_dataframes(depth:int =1, exclude_hidden:bool =True) -> pl.DataFrame | None:
     empty_df = pl.DataFrame(data=None,schema={"df":pl.String, "nr": pl.Int64, "nc": pl.Int64, "cols": pl.List(pl.String), "df_type": pl.String})
     pd_dfs = pandas_dataframes(depth+1)
     pl_dfs = polars_dataframes(depth+1)
