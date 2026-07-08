@@ -6,7 +6,7 @@
 ## bash $ uv run example.py
 ## bash $ uv run --python 3.10 example.py # to use specific version of python
 ##
-import re, typing as ty, inspect, collections, random, sys, dataclasses as dc,math,decimal, fractions, numbers, itertools
+import re, typing as ty, inspect, collections, random, sys, dataclasses as dc,math,decimal, fractions, numbers, itertools, datetime
 import functools,operator
 
 try: import numpy as np, pandas as pd
@@ -720,3 +720,7 @@ def list_module_methods(m) -> pl.DataFrame:
 def print_source(o): print(get_source(o))
 print_src, get_src = print_source, get_source
 ## q=quit
+def upper(x): return x.upper()
+def lower(x): return x.lower()
+toupper, tolower = upper, lower
+TODAY = datetime.date.today()
