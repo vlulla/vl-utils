@@ -571,6 +571,21 @@ def splitarray(xs: collections.abc.Iterable[T], stride:int) -> collections.abc.I
 ##   ## print(f"(xs,n) => {xs,n}") ## To see that hypothesis is actually running this test!
 ##   assert xs == functools.reduce(lambda a,b: a+b, splitarray(xs,n),type(xs)())
 
+def sublists(l: collections.abc.Iterable[T], n: int=1) -> collections.abc.Iterable[collections.abc.Iterable[T]]:
+  """
+  >>> sublists([], 5)              # [[]]
+  >>> sublists([1,2,3,4], 5)       # [[1,2,3,4]]
+  >>> sublists([1,2,3,4,5], 5)     # [[1,2,3,4,5]]
+  >>> sublists([1,2,3,4,5,6,7], 5) # [[1,2,3,4,5],[2,3,4,5,6],[3,4,5,6,7]]
+  >>> sublists((1,2,3,4,5,6,7), 5) # ((1,2,3,4,5),(2,3,4,5,6),(3,4,5,6,7))
+  >>> sublists("vijay", 3)         # ['vij','ija','jay']
+  """
+  assert isinstance(n, int) and n>0
+  if not isinstance(l, collections.abc.Sequence): raise TypeError(f"Unsupported {type(l)}. Only works for collections.abc.Sequence. So, won't work for np.ndarray too!")
+  if len(l) < n: return type(l)([l])
+  rettype = identity if isinstance(l, str) else type(l)
+  return rettype([l[i:i+n] for i in range(len(l)-n+1)])
+
 def idir():
   """
   dir alternative for IPython.
