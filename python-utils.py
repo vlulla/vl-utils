@@ -175,14 +175,7 @@ def every_nth(n: int):
   assert isinstance(n, int) and n > 0
   return slice(None,None,n)
 
-def repeat(x: T, n: int = 1) -> list[T]:
-  """
-  >>> repeat([1,2,3],2) # [[1,2,3],[1,2,3]]
-  >>> repeat(4,2) # [4,4]
-  >>> ''.join(repeat('abc',4)) == 'abc'*4 # True
-  """
-  assert isinstance(n,int) and n > 0
-  return [x for _ in range(n)]
+repeat = itertools.repeat
 
 def replicate(n: int, fn:ty.Callable, /, *args, **kwargs):
   """
