@@ -573,12 +573,15 @@ def splitarray(xs: collections.abc.Iterable[T], stride:int) -> collections.abc.I
 
 def sublists(l: collections.abc.Iterable[T], n: int=1) -> collections.abc.Iterable[collections.abc.Iterable[T]]:
   """
+  This is kind of like np.lib.stride_tricks.sliding_window_view.  Certainly not as flexible as sliding_window_view though!
   >>> sublists([], 5)              # [[]]
   >>> sublists([1,2,3,4], 5)       # [[1,2,3,4]]
   >>> sublists([1,2,3,4,5], 5)     # [[1,2,3,4,5]]
   >>> sublists([1,2,3,4,5,6,7], 5) # [[1,2,3,4,5],[2,3,4,5,6],[3,4,5,6,7]]
   >>> sublists((1,2,3,4,5,6,7), 5) # ((1,2,3,4,5),(2,3,4,5,6),(3,4,5,6,7))
   >>> sublists("vijay", 3)         # ['vij','ija','jay']
+  >>> x = np.arange(6)
+  >>> (np.lib.stride_tricks.sliding_window_view(x,3) == np.array(sublists(list(x),3))).all()
   """
   assert isinstance(n, int) and n>0
   if not isinstance(l, collections.abc.Sequence): raise TypeError(f"Unsupported {type(l)}. Only works for collections.abc.Sequence. So, won't work for np.ndarray too!")
