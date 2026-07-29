@@ -516,7 +516,7 @@ def make_param_grid(param: dict) -> pd.DataFrame:
                        'holidays_prior_scale': np.linspace(0.01,10,num=5).tolist()})
   """
   assert isinstance(param, dict)
-  assert all(isinstance(v, list) for v in param.values())
+  assert all(isinstance(v, (list,tuple)) for v in param.values())
   df = pd.DataFrame(itertools.product(*param.values()),columns=param)
   assert df.shape == (np.prod([len(_) for _ in param.values()]), len(param))
   return df
