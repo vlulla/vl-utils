@@ -507,14 +507,15 @@ def negate(pred: collections.abc.Callable[P, bool]) -> collections.abc.Callable[
     return not pred(*args,**kwargs)
   return _inner
 
-def make_param_grid(param: dict) -> pd.DataFrame:
+def make_param_grid(**kwargs) -> pd.DataFrame:
   """
   Trying to emulate R's expand.grid.
   R> expand.grid(x=1:5,y=12:13)
-  >>> make_param_grid({'x':[1,2,3,4,5],'y':[12,13]})
-  >>> make_param_grid({'chgpt_prior_scale':np.linspace(0.001,0.5,num=5).tolist(),
-                       'holidays_prior_scale': np.linspace(0.01,10,num=5).tolist()})
+  >>> make_param_grid(x=[1,2,3,4,5],y=[12,13]})
+  >>> make_param_grid(chgpt_prior_scale=np.linspace(0.001,0.5,num=5).tolist(),
+                       holidays_prior_scale= np.linspace(0.01,10,num=5).tolist()})
   """
+  param = kwargs
   assert isinstance(param, dict)
   assert all(isinstance(v, (list,tuple)) for v in param.values())
   df = pd.DataFrame(itertools.product(*param.values()),columns=param)
