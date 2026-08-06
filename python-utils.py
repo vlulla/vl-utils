@@ -235,12 +235,13 @@ def rangealong(l: collections.abc.Iterable) -> collections.abc.Iterable:
   return range(len(l))
 
 
-def pandas_dataframes(depth:int =1) -> pd.DataFrame | None:
+def pandas_dataframes(depth:int=1, include_hidden=False) -> pd.DataFrame | None:
   ## frames = [(o,globals()[o]) for o in globals() if isinstance(globals()[o], pd.DataFrame) and o[0] != '_']
+  include_hidden=bool(include_hidden)
   parent = sys._getframe(depth)
   frames = tuple(
     (k,v) for k,v in parent.f_locals.items()
-    if isinstance(v, pd.DataFrame) ## and k[0] != '_'
+    if isinstance(v, pd.DataFrame) and (include_hidden or k[0] != '_')
   )
   if len(frames) == 0:
     print("No pd.DataFrame found in the environment.", file=sys.stderr)
@@ -254,12 +255,13 @@ def pandas_dataframes(depth:int =1) -> pd.DataFrame | None:
 try:
   import polars as pl
 
-  def polars_dataframes(depth: int=1) -> pl.DataFrame | None:
+  def polars_dataframes(depth: int=1, include_hidden=False) -> pl.DataFrame | None:
     ## frames = [(o,globals()[o]) for o in globals() if isinstance(globals()[o],pl.DataFrame) and o[0] != '_']
+    include_hidden=bool(include_hidden)
     parent = sys._getframe(depth)
     frames = tuple(
       (k,v) for k,v in parent.f_locals.items()
-      if isinstance(v,pl.DataFrame) ## and k[0] != '_'
+      if isinstance(v,pl.DataFrame) and (include_hidden or  k[0] != '_')
     )
     if len(frames) == 0:
       print("No pl.DataFrame found in the environment.", file=sys.stderr)
