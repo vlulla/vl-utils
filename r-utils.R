@@ -69,7 +69,7 @@ pol2cart <- function(rho,phi) { list(x=rho*cos(phi), y=rho*sin(phi)) }
 cov.pop <- function(x, y=NULL, ...) { cov(x, y, ...) * (NROW(x)-1)/NROW(x) }
 var.pop <- function(x, ...) { var(x, ...) * (NROW(x)-1)/NROW(x) }
 sd.pop <- function(x, na.rm=FALSE) { sqrt(var.pop(x, na.rm=na.rm)) }
-rmse <- RMSE <- function(residuals) sqrt(mean(residuals))
+rmse <- RMSE <- function(yhat, y) sqrt(mean((yhat - y)^2))
 normalize <- function(x) { (x - min(x)) / (max(x) - min(x)) }
 
 fixcolnames <- normalize_string <- function(x, lowercase=FALSE) {
