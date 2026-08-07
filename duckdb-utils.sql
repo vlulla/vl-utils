@@ -166,3 +166,10 @@ create or replace macro table_dims() as TABLE (select database_name,schema_name,
 -- D select * from grid([1,2],[1,2,3,4,5,6]);
 -- D with grid as (select * from grid(range(1,7),range(1,7))) select a+b as sum,count(*) as cnt from grid group by all order by cnt desc; -- generate most likely outcomes of two dice!
 create or replace macro grid(a,b) as TABLE(with a as(select unnest(a) as a), b as (select unnest(b) as b) select * from a,b);
+
+-- kinda like BQ's excellent initcap function...but not as flexible...especially the delimiters!
+-- D select initcap('splitting on spaces is the most convenient.  Works with extra spaces too   !');
+-- D select initcap('tricky with spaces after delimiter.  notice the incosistent sentence case?', '.');
+-- D select initcap('similar with questions too? sigh...', '?')
+-- D select initcap('but works when delimiter is appropriately chosen!  see the difference?', '!  ');
+create or replace macro initcap(s text, delimiter text := ' ') as (list_reduce(list_apply(string_split(s, delimiter), lambda x: upper(substring(x,1,1))||substring(x,2)),lambda acc,x: acc||delimiter||x));
