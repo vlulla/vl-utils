@@ -284,7 +284,7 @@ try:
   type BQParam = bq.ScalarQueryParameter | bq.ArrayQueryParameter | bq.StructQueryParameter | bq.RangeQueryParameter
 
   def gcp_to_polars(qry: str, params:list[BQParam]=[], PROJECT:str='') -> pl.DataFrame:
-    ## NOTE (vijay): This does not work with Interval/Duration types! I get the error "The datatype tin (for IntervalUnit::MonthDayNanon) is still not supported in Rust implementation....see https://arrow.apache.org/rust/src/arrow_schema/ffi.rs.html
+    ## NOTE (vijay): need POLARS_IMPORT_INTERVAL_AS_STRUCT=1 envvar for reading interval as struct.  Still get a warning "Extension type 'google:sqlType:interval' is not registered; loading as its storage type."
     assert PROJECT != '', f"Cannot have empty PROJECT"
     if len(params) > 0:
       params_in_qry = [p[1:] for p in re.findall(r"(@[a-zA-Z][a-zA-Z0-9_]*)", qry)]
