@@ -173,3 +173,8 @@ create or replace macro grid(a,b) as TABLE(with a as(select unnest(a) as a), b a
 -- D select initcap('similar with questions too? sigh...', '?')
 -- D select initcap('but works when delimiter is appropriately chosen!  see the difference?', '!  ');
 create or replace macro initcap(s text, delimiter text := ' ') as (list_reduce(list_apply(string_split(s, delimiter), lambda x: upper(substring(x,1,1))||substring(x,2)),lambda acc,x: acc||delimiter||x));
+
+-- Duckdb does not have list_quantile function! https://duckdb.org/docs/current/sql/functions/list#list-aggregates
+-- D with _ as (select random() r from unnest(range(15))) select list(r) as rr,list_quantile(rr,0.85) from _;
+-- D with _ as (select random() r from unnest(range(151))) select list(r) as rr,list_quantile(rr,0.5)=list_median(rr) oughttabetrue from _; -- NOTE (vijay): oughttabetrue will only work for odd length lists.  See the definition of median for even length lists.
+create or replace macro list_quantile(x, q) as (with _ as (select unnest(x) as xx) select quantile(xx, q) from _);
