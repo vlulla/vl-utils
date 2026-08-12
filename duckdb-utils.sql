@@ -177,4 +177,5 @@ create or replace macro initcap(s text, delimiter text := ' ') as (list_reduce(l
 -- Duckdb does not have list_quantile function! https://duckdb.org/docs/current/sql/functions/list#list-aggregates
 -- D with _ as (select random() r from unnest(range(15))) select list(r) as rr,list_quantile(rr,0.85) from _;
 -- D with _ as (select random() r from unnest(range(151))) select list(r) as rr,list_quantile(rr,0.5)=list_median(rr) oughttabetrue from _; -- NOTE (vijay): oughttabetrue will only work for odd length lists.  See the definition of median for even length lists.
+-- D with _ as (select random() r from unnest(range(151))) select list(r) as rr, list_quantile(rr,[0.025,0.975]) as interval95 from _;
 create or replace macro list_quantile(x, q) as (with _ as (select unnest(x) as xx) select quantile(xx, q) from _);
