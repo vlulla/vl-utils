@@ -6,8 +6,7 @@
 ## bash $ uv run example.py
 ## bash $ uv run --python 3.10 example.py # to use specific version of python
 ##
-import re, typing as ty, inspect, collections, random, sys, dataclasses as dc,math,decimal, fractions, numbers, itertools, datetime
-import functools,operator
+import re, typing as ty, inspect, collections, random, sys, dataclasses as dc,math,itertools, datetime, numbers, string, functools
 
 try: import numpy as np, pandas as pd
 except ModuleNotFoundError as e: print(f"{e=}", file=sys.stderr)
@@ -206,7 +205,6 @@ def genrandstr(n: int = 5, lowercase=False) -> str:
   ## chars=[chr(ord('A')+i) for i in range(26)] + [chr(ord('a')+i) for i in range(26)] # + [chr(ord('0')+i) for i in range(10)]
   ## idx = [random.randint(0,len(chars)) for _ in range(n)]
   ## return ''.join(chars[i%len(chars)] for i in idx)
-  import string,random
   chars = string.ascii_lowercase + ('' if lowercase else string.ascii_uppercase) + string.digits
   return ''.join(random.choice(chars) for _ in range(abs(n)))
 
@@ -217,7 +215,7 @@ def get_source(obj) -> str:
     try:
       src = inspect.getsource(o)
     except TypeError as e:
-      src = f"src {str(o)} of built-in module, class, or function unavailable"
+      src = f"src {o!s} of built-in module, class, or function unavailable"
       print(f"{e=}",file=sys.stderr)
     return src
   return _get_src(obj)
@@ -285,7 +283,7 @@ try:
 
   def gcp_to_polars(qry: str, params:list[BQParam]=[], PROJECT:str='') -> pl.DataFrame:
     ## NOTE (vijay): need POLARS_IMPORT_INTERVAL_AS_STRUCT=1 envvar for reading interval as struct.  Still get a warning "Extension type 'google:sqlType:interval' is not registered; loading as its storage type."
-    assert PROJECT != '', f"Cannot have empty PROJECT"
+    assert PROJECT != '', "Cannot have empty PROJECT"
     if len(params) > 0:
       params_in_qry = [p[1:] for p in re.findall(r"(@[a-zA-Z][a-zA-Z0-9_]*)", qry)]
       params_names = [p.name for p in params]
@@ -314,7 +312,7 @@ try:
     ##   https://github.com/googleapis/python-bigquery/blob/main/samples/client_query_w_array_params.py
     ##   https://github.com/googleapis/python-bigquery/blob/main/samples/client_query_w_named_params.py
     ##   https://github.com/googleapis/python-bigquery/blob/main/samples/client_query_w_struct_params.py
-    assert PROJECT != '', f"Cannot have empty PROJECT"
+    assert PROJECT != '', "Cannot have empty PROJECT"
     if len(params) > 0:
       params_in_qry = [p[1:] for p in re.findall(r"(@[a-zA-Z][a-zA-Z0-9_]*)", qry)]
       params_names = [p.name for p in params]
@@ -329,7 +327,7 @@ try:
 except NameError as e:
   print(f"{e=}",file=sys.stderr)
 
-def calculate_woe(df: pd.DataFrame, feature: str, target: str, zeroadjust=True) -> ty.Tuple[pd.DataFrame, float]:
+def calculate_woe(df: pd.DataFrame, feature: str, target: str, zeroadjust=True) -> tuple[pd.DataFrame, float]:
   ## https://documentation.sas.com/doc/en/vdmmlcdc/8.1/casstat/viyastat_binning_details02.htm
   ## https://www.google.com/search?q=weight+of+evidence
 
@@ -357,10 +355,10 @@ def df_coltypes[T: (pd.DataFrame, pl.DataFrame)](df: T) -> T:
   assert isinstance(df, (pd.DataFrame, pl.DataFrame))
   typ = type(df)
   if typ == pd.DataFrame:
-    cols_with_attrs = [(i,c,f"{str(df[c].dtype)}",df[c].nunique(),100*df[c].nunique()/df.shape[0],df[c].isna().sum(),100*df[c].isna().sum()/df.shape[0]) for i,c in enumerate(df.columns)]
+    cols_with_attrs = [(i,c,f"{df[c].dtype!s}",df[c].nunique(),100*df[c].nunique()/df.shape[0],df[c].isna().sum(),100*df[c].isna().sum()/df.shape[0]) for i,c in enumerate(df.columns)]
     ret = pd.DataFrame(cols_with_attrs, columns=["colidx", "colname", "coltype", "nunique", "pctunique", "numna", "pctna"])
   elif typ == pl.DataFrame:
-    cols_with_attrs = [(i,c,f"{str(df[c].dtype)}",df[c].n_unique(),100*df[c].n_unique()/df.shape[0],df[c].null_count(),100*df[c].null_count()/df.shape[0]) for i,c in enumerate(df.columns)]
+    cols_with_attrs = [(i,c,f"{df[c].dtype!s}",df[c].n_unique(),100*df[c].n_unique()/df.shape[0],df[c].null_count(),100*df[c].null_count()/df.shape[0]) for i,c in enumerate(df.columns)]
     ret = pl.DataFrame( cols_with_attrs,schema=["colidx","colname","coltype","nunique","pctunique","numna","pctna"], orient="row")
   return ret
 
@@ -379,7 +377,6 @@ def make_dataclass_from_df(df: pd.DataFrame, name_of_dataclass: str="DF"):
   """
   assert df.shape[1]>0, f"df.shape appears strange. {df.shape}"
 
-  import dataclasses as dc
   return dc.make_dataclass(name_of_dataclass, [(str(c).replace(' ','_'), df[c].dtypes.type) for c in df.columns])
 
 def get_callables_for(o: ty.Any) -> dict[str,ty.Callable]:
@@ -416,8 +413,6 @@ def grid(axis: ty.Literal["both","x","y"]="both") -> None:
   plt.minorticks_on()
   plt.grid(which="major", ls="-", alpha=1/4, axis=axis)
   plt.grid(which="minor", ls=":", alpha=1/8, axis=axis)
-  return None
-
 
 def grep[L: collections.abc.Iterable[T]](regex: str, lst: L, invert=False, ignorecase=False) -> L:
   """
@@ -613,7 +608,7 @@ def daynames(): return 'Sunday','Monday','Tuesday','Wednesday','Thursday','Frida
 def monthdays(isleapyear=False): return 31,28+isleapyear,31,30,31,30,31,31,30,31,30,31
 
 def togglesqlcomment(s):
-  assert isinstance(s,(type(""),)), "Need a str"
+  assert isinstance(s, str), "Need a str"
   if not s: return s ## s=="" or s==None
   return s[3:] if s[:3] == '-- ' else f"-- {s}"
 
@@ -650,14 +645,15 @@ def fit_gamma(data, bins=10, title=None) -> None:
     >>> fit_gamma(d)
     >>> fit_gamma(d, bins=20)
     """
-    import math, numpy as np, matplotlib, matplotlib.pyplot as plt, scipy.stats as stats
+    import numpy as np, matplotlib.pyplot as plt
+    from scipy import stats
     if any(x<0 for x in data): raise ValueError("Gamma function only works for +ve values.")
     assert all(attr in dir(data) for attr in ("min", "max", "shape", "mean", "std"))
 
     bounds = {"a": (0, max(data.max(), 1e9))} ## gamma's support is [0, inf)!
-    a, loc, scale = stats.fit(stats.gamma, data=data, bounds=bounds).params
+    a, _loc, _scale = stats.fit(stats.gamma, data=data, bounds=bounds).params
 
-    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(14,8))
+    _fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(14,8))
     ax.hist(data, bins=bins, density=True)
     start, end = stats.gamma.ppf([0.001, 0.999], a)
     x = np.linspace(start, end, 100)
@@ -666,21 +662,20 @@ def fit_gamma(data, bins=10, title=None) -> None:
     grid() ## defined above
     plt.show()
 
-    return None
-
 def fit_normal(data, bins=10, title=None) -> None:
     """
     >>> d = scipy.stats.norm.rvs(loc=68.2, scale=15.32, size=1_000)
     >>> fit_normal(d)
     >>> fit_normal(d, bins=20)
     """
-    import math, numpy as np, matplotlib, matplotlib.pyplot as plt, scipy.stats as stats
+    import numpy as np, matplotlib.pyplot as plt
+    from scipy import stats
     assert all(attr in dir(data) for attr in ("min", "max", "shape", "mean", "std"))
 
     bounds = {"loc":(data.min(), data.max()), "scale": (data.std(), data.std())} ## fix the scale parameter!
     loc, scale = stats.fit(stats.norm, data=data, bounds=bounds).params
 
-    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(14,8))
+    _fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(14,8))
     ax.hist(data, bins=bins, density=True)
     start, end = stats.norm.ppf([0.001, 0.999], loc=loc, scale=scale)
     x = np.linspace(start, end, 100)
@@ -718,7 +713,7 @@ def list_module_methods(m) -> pl.DataFrame:
     This is something like R's excellent `ls.str` function!
     """
     assert type(m) == type(sys) ##
-    callables = list(_ for _ in dir(m) if callable(getattr(m, _)) and _[0] != '_')
+    callables = [_ for _ in dir(m) if callable(getattr(m, _)) and _[0] != '_']
     assert len(callables)>0
     callables_args = []
     try: ## Need this because despite polars.col being callable, it raises exception for python's inspect module!
@@ -737,4 +732,4 @@ print_src, get_src = print_source, get_source
 def upper(x): return x.upper()
 def lower(x): return x.lower()
 toupper, tolower = upper, lower
-TODAY = datetime.date.today()
+TODAY = datetime.datetime.now(tz=datetime.timezone.utc).date()
