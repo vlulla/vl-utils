@@ -6,7 +6,7 @@
 ## bash $ uv run example.py
 ## bash $ uv run --python 3.10 example.py # to use specific version of python
 ##
-import re, typing as ty, inspect, collections, random, sys, dataclasses as dc,math,itertools, datetime, numbers, string, functools
+import re, typing, inspect, collections, random, sys, dataclasses as dc,math,itertools, datetime, numbers, string, functools, logging, time
 
 try: import numpy as np, pandas as pd
 except ModuleNotFoundError as e: print(f"{e=}", file=sys.stderr)
@@ -29,6 +29,9 @@ except ModuleNotFoundError as e: print(f"{e=}", file=sys.stderr)
 
 try: import torch as t, einops as eo
 except ModuleNotFoundError as e: print(f"{e=}", file=sys.stderr)
+
+T = typing.TypeVar("T")
+P = typing.ParamSpec('P')
 
 def fix_colnames(colname: str, normalize_adjacent_uppers: bool = True) -> str:
   """
@@ -65,7 +68,6 @@ def fix_colnames(colname: str, normalize_adjacent_uppers: bool = True) -> str:
   return fixed_colname
 
 
-T = ty.TypeVar("T")
 def identity(x: T) -> T: return x ## surprisingly useful!
 
 ## ## @hy.settings(max_examples=500) # more thorough but slower
@@ -176,7 +178,7 @@ def every_nth(n: int):
 
 repeat = itertools.repeat
 
-def replicate(n: int, fn:ty.Callable, /, *args, **kwargs):
+def replicate(n: int, fn:typing.Callable, /, *args, **kwargs):
   """
   Trying to replicate R's replicate functionality.
   >>> def initials(n:int = 2): return ''.join(random.choices(string.ascii_lowercase, k=n))
@@ -379,7 +381,7 @@ def make_dataclass_from_df(df: pd.DataFrame, name_of_dataclass: str="DF"):
 
   return dc.make_dataclass(name_of_dataclass, [(str(c).replace(' ','_'), df[c].dtypes.type) for c in df.columns])
 
-def get_callables_for(o: ty.Any) -> dict[str,ty.Callable]:
+def get_callables_for(o: typing.Any) -> dict[str,typing.Callable]:
   """
     >>> pd_funcs = (get_callables_for(pd) | get_callables_for(pd.DataFrame) | get_callables_for(pd.Series))
     >>> df = pd.DataFrame([(name,inspect.signature(func),len(inspect.signature(func).parameters))
@@ -406,7 +408,7 @@ def get_callables_for(o: ty.Any) -> dict[str,ty.Callable]:
   """
   return {f"{o.__name__}.{fname}": getattr(o,fname) for fname in dir(o) if callable(getattr(o,fname))}
 
-def grid(axis: ty.Literal["both","x","y"]="both") -> None:
+def grid(axis: typing.Literal["both","x","y"]="both") -> None:
   ## Neat idea from https://github.com/norvig/pytudes/blob/main/ipynb/BikeCode.ipynb
   import matplotlib.pyplot as plt
   ## plt.rcParams['figure.figsize'] = (12, 6)
@@ -488,7 +490,6 @@ def gsub[L: list[str] | set[str] | tuple[str]](regex: str, repl: str, lst: str |
   if isinstance(lst, str): return _gsub(regex, repl, lst)
   return type(lst)(_gsub(regex, repl, c) for c in lst)
 
-P = ty.ParamSpec('P')
 def negate(pred: collections.abc.Callable[P, bool]) -> collections.abc.Callable[P, bool]:
   """
   This is useful for filter. And, it is also like itertools.filterfalse
