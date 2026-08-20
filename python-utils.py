@@ -726,6 +726,35 @@ def list_module_methods(m) -> pl.DataFrame:
     assert len(callables_args)>0
     return pl.DataFrame({f"{m.__name__} signatures": callables_args})
 
+def timefunc(fn: typing.Callable[P, T]) -> typing.Callable[P, T]:
+    """
+    Log how long a function takes.
+    >>> @timefunc
+        def tst(a, b):
+            time.sleep(a*b)
+            pass
+    >>> logging.basicConfig()
+    >>> tst(4,0.5)
+    DEBUG:timefunc:tst(4, 0.5) took: 2.0001461670000821 seconds.
+    """
+
+    @functools.wraps(fn)
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
+        logger = logging.getLogger("timefunc")
+        logger.setLevel(logging.DEBUG)
+        sig = ", ".join([f"{a!r}" for a in args] + [f"{k}={v!r}" for k,v in kwargs.items()])
+        try:
+            stime = time.monotonic()
+            res = fn(*args, **kwargs)
+            etime = time.monotonic()
+            dur = etime - stime
+            logger.debug(f"{fn.__name__}({sig}) took: {dur} seconds.")
+            return res
+        except Exception:
+            logger.exception(f"Exception raised in {fn.__name__}({sig}).")
+            raise
+    return wrapper
+
 ## some aliases ... especially useful in repl
 def print_source(o): print(get_source(o))
 print_src, get_src = print_source, get_source
