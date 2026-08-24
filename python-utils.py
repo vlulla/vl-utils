@@ -377,9 +377,10 @@ def make_dataclass_from_df(df: pd.DataFrame, name_of_dataclass: str="DF"):
     >>> ## barbiehouse = Place(*places.iloc[[1],:]     ) ## NOTE: wrong!
     >>> barbiehouseDf = pd.DataFrame({k:[v] for k,v in dc.asdict(barbiehouse).items()})
   """
+  assert isinstance(df, pd.DataFrame), f"{type(df)=}" ## use .to_pandas() if using polars.
   assert df.shape[1]>0, f"df.shape appears strange. {df.shape}"
 
-  return dc.make_dataclass(name_of_dataclass, [(str(c).replace(' ','_'), df[c].dtypes.type) for c in df.columns])
+  return dc.make_dataclass(name_of_dataclass, [(str(c).replace(' ','_'), df[c].dtype.type) for c in df.columns])
 
 def get_callables_for(o: typing.Any) -> dict[str,typing.Callable]:
   """
