@@ -11,24 +11,8 @@ import re, typing, inspect, collections, random, sys, dataclasses as dc,math,ite
 try: import numpy as np, pandas as pd
 except ModuleNotFoundError as e: print(f"{e=}", file=sys.stderr)
 
-try: import jax.numpy as jnp
-except ModuleNotFoundError as e: print(f"{e=}", file=sys.stderr)
-
-try: import hypothesis as hy, hypothesis.strategies as st
-except ModuleNotFoundError as e: print(f"{e=}",file=sys.stderr)
-
-
 try: from google.cloud import bigquery as bq
 except ModuleNotFoundError as e: print(f"{e=}",file=sys.stderr)
-
-try: import duckdb as ddb
-except ModuleNotFoundError as e: print(f"{e=}", file=sys.stderr)
-
-try: import pyarrow as pa
-except ModuleNotFoundError as e: print(f"{e=}", file=sys.stderr)
-
-try: import torch as t, einops as eo
-except ModuleNotFoundError as e: print(f"{e=}", file=sys.stderr)
 
 T = typing.TypeVar("T")
 P = typing.ParamSpec('P')
