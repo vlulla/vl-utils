@@ -3,11 +3,11 @@
 -- D
 
 -- select yqtr,count(*),min(dt) first_dt,max(dt) as last_dt from (select dt,yearqtr(dt) as yqtr from (select unnest(generate_series('2024-01-01'::date,'2024-12-31',interval 1 day))::date as dt)) group by all order by yqtr;
--- create or replace macro yearqtr(x) as (select (date_part('year', x::date)*10+((date_part('month', x::date)-1) // 3) + 1));
-create or replace macro yearqtr(x) as (select (year(x::date)*10)+quarter(x::date));
+-- create or replace temporary macro yearqtr(x) as (select (date_part('year', x::date)*10+((date_part('month', x::date)-1) // 3) + 1));
+create or replace temporary macro yearqtr(x) as (select (year(x::date)*10)+quarter(x::date));
 
 -- select * from calendar_between_dates('2024-06-15','2025-02-13'); -- calendar dates between custom dates!!
-create or replace macro calendar_between_dates(start_date,end_date) as table (
+create or replace temporary macro calendar_between_dates(start_date,end_date) as table (
 with
   dates as (select unnest(generate_series(start_date::date,end_date::date,interval 1 day)::date[])::date as dt)
 , dates_with_attrs as (select dt,year(dt) as YYYY, month(dt) as MM, extract(day from dt) as DD, dayofyear(dt) as DOY, dayofmonth(dt) as DOM, weekofyear(dt) as WOY, yearweek(dt) as ISOYYYYWK, extract(weekday from dt) as dow,strftime(dt,'%a') as dow_n, isodow(dt) as ISODOW, dayofweek(dt) as dow_num, quarter(dt) as Q,YYYY||''||Q as YYYYQ from dates)
@@ -42,14 +42,14 @@ select * exclude(holiday)
 
 -- select * from calendar_year(2024);
 -- with _ as (select extract(year from current_date())+unnest(range(1,11)) as yr) select * from _,calendar_year(_.yr) order by dt; -- table for next 10 years!
-create or replace macro calendar_year(yr) as TABLE (select * from calendar_between_dates(yr||'-01-01', yr||'-12-31'));
+create or replace temporary macro calendar_year(yr) as TABLE (select * from calendar_between_dates(yr||'-01-01', yr||'-12-31'));
 
 -- select * from random_date_range(10);
 -- select * from random_date_range(floor(365*random())::int); -- even better!
 -- with _ as (select * from random_date_range(floor(365*random())::int)) select length(dates) as len,dates from _;
 -- with _ as (select floor(random()*50)::int as n) select n,dates from _ JOIN random_date_range(n) on TRUE; -- n comes from _ CTE!
 -- with _ as (select floor(random()*50)::int as n) select n,dates from _,random_date_range(n); -- same as previous...but JOIN is implicit...
-create or replace macro random_date_range(ndays) as TABLE (with _ as (select '2000-01-01'::date + floor((current_date() - '2000-01-01'::date)*random())::int as start_date) select generate_series(start_date,start_date + ndays - 1,interval 1 day)::date[] as dates from _);
+create or replace temporary macro random_date_range(ndays) as TABLE (with _ as (select '2000-01-01'::date + floor((current_date() - '2000-01-01'::date)*random())::int as start_date) select generate_series(start_date,start_date + ndays - 1,interval 1 day)::date[] as dates from _);
 
 -- select * from days_around_date('2024-11-28'::date,5); -- query to generate a window around a date. This is very useful for creating windows to compare times from different years.
 -- Here's an interesting use case: comparing a month around thanksgiving/black friday for different years. For instance, comparing cybermondays on 2023 and 2024 can be compared by using date axes: days_around_date('2024-12-02'::date,15) and days_around_date('2023-11-27'::date,15)!!
@@ -57,7 +57,7 @@ create or replace macro random_date_range(ndays) as TABLE (with _ as (select '20
 -- with yr2024 as (select unnest(range(length(dates))) as rn,unnest(dates) as dt2024 from days_around_date('2024-12-02'::date,15))
 --     ,yr2023 as (select unnest(range(length(dates))) as rn,unnest(dates) as dt2023 from days_around_date('2023-11-27'::date,15))
 -- select * exclude(rn) from yr2023 join yr2024 using(rn);
-create or replace macro days_around_date(date,ndays) as TABLE(select generate_series(date-interval (ndays) day,date-interval 1 day,interval 1 day)::date[]||[date]||generate_series(date+interval 1 day,date+interval (ndays) day,interval 1 day)::date[] as dates);
+create or replace temporary macro days_around_date(date,ndays) as TABLE(select generate_series(date-interval (ndays) day,date-interval 1 day,interval 1 day)::date[]||[date]||generate_series(date+interval 1 day,date+interval (ndays) day,interval 1 day)::date[] as dates);
 
 -- This date_trunc is analogous to BQ's default date_trunc with default week date_granularity. BQ's date_trunc is interesting in that you can select what represents the first day of the week (dow).
 -- date_trunc(current_date(), week) -- default date_granularity ... same as date_trunc(current_date(), week(sunday))
@@ -66,18 +66,18 @@ create or replace macro days_around_date(date,ndays) as TABLE(select generate_se
 -- However, for certain situations it might be useful to consider a week from Sun-Sat instead of Mon-Sun. Since, Sun-Sat week grouping comes up so often that i think creating this macro is useful. Use it along with duckdb's default `date_trunc` function to get different aggregations...
 --
 -- with _ as (select unnest(generate_series(current_date()-interval 5 day,current_date()+interval 5 day,interval 1 day))::date as _) select _,date_trunc('week',_) as defaut_date_trunc,date_trunc_week_like_bq(_) as "date_trunc-like-BQ" from _;
-create or replace macro date_trunc_week_like_bq(dt) as (select (date_trunc('week',dt::date+interval 1 day)-interval 1 day)::date);
+create or replace temporary macro date_trunc_week_like_bq(dt) as (select (date_trunc('week',dt::date+interval 1 day)-interval 1 day)::date);
 
 -- convert currency formatted numbers into mathematical numbers
 -- can only deal with '$'!
-create or replace macro money_to_numeric(d) as ( select replace(replace(replace(replace(d,'$',''),',',''),')',''),'(','-')::numeric(18,2) );
+create or replace temporary macro money_to_numeric(d) as ( select replace(replace(replace(replace(d,'$',''),',',''),')',''),'(','-')::numeric(18,2) );
 -- with _ as (select unnest(['-$1,234.10','$1,234.10','($1,234.10)','($0.99999)', '   $0.3333333333333333', '    ($0.3333333333333333)     ', '$0.0', '($6.080089694185882e-110)','($4.080089694185882e-10)     ']) as m) select m,printf('"%s"',m) as "m with quotes",money_to_numeric(m) as mm from _;
 
 -- Proportions in the array...maintains nulls!
-create or replace macro array_prop(d) as (with _ as (select list_reduce(list_filter(d,lambda _:_ is not null),lambda a,b:a+b) as dsum) select list_transform(d,lambda x:x/dsum) from _);
+create or replace temporary macro array_prop(d) as (with _ as (select list_reduce(list_filter(d,lambda _:_ is not null),lambda a,b:a+b) as dsum) select list_transform(d,lambda x:x/dsum) from _);
 
 -- random str of length len
-create or replace macro randomstr(len) as (
+create or replace temporary macro randomstr(len) as (
   -- with _ as (select 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' as alpha,'0123456789' as num)
   --   , _1 as (select *,alpha||num as alnum,length(alpha) as alen,length(num) as nlen from _)
   -- --   , _2 as (select alnum,cast(trunc(random()*alen) as int) as fst, apply(range(1,len),lambda x:cast(trunc(random()*(alen+nlen))+1 as int)) as rest from _1)
@@ -91,7 +91,7 @@ create or replace macro randomstr(len) as (
 -- select randomstr(cast(100*random() as int));
 
 -- holiday features for various timeseries forecasting related tasks...
-create or replace macro datefeatures(startdate, enddate) as TABLE
+create or replace temporary macro datefeatures(startdate, enddate) as TABLE
 (
 with
   dates as (select unnest(generate_series(cast(startdate as date),cast(enddate as date),interval 1 day)::date[]) as date)
@@ -155,27 +155,27 @@ order by date
 -- select * from datefeatures('2025-01-01','2025-12-31');
 
 -- workaround for missing difference operator for time data type
-create or replace macro time_diff(t1, t2) as ('2000-01-01T'||t1)::timestamp - ('2000-01-01T'||t2)::timestamp;
+create or replace temporary macro time_diff(t1, t2) as ('2000-01-01T'||t1)::timestamp - ('2000-01-01T'||t2)::timestamp;
 -- select time_diff(time '20:18:32.05', time '18:00:28.1'); -- same as time '20:18:32.05' - time '18:00:28.1'
 
 -- D VACUUM ANALYZE;
 -- D call table_dims(); -- to get dims of table...
-create or replace macro table_dims() as TABLE (select database_name,schema_name,table_name,estimated_size as nrow,column_count as ncol from duckdb_tables());
+create or replace temporary macro table_dims() as TABLE (select database_name,schema_name,table_name,estimated_size as nrow,column_count as ncol from duckdb_tables());
 
 -- similar to R's expand.grid
 -- D select * from grid([1,2],[1,2,3,4,5,6]);
 -- D with grid as (select * from grid(range(1,7),range(1,7))) select a+b as sum,count(*) as cnt from grid group by all order by cnt desc; -- generate most likely outcomes of two dice!
-create or replace macro grid(a,b) as TABLE(with a as(select unnest(a) as a), b as (select unnest(b) as b) select * from a,b);
+create or replace temporary macro grid(a,b) as TABLE(with a as(select unnest(a) as a), b as (select unnest(b) as b) select * from a,b);
 
 -- kinda like BQ's excellent initcap function...but not as flexible...especially the delimiters!
 -- D select initcap('splitting on spaces is the most convenient.  Works with extra spaces too   !');
 -- D select initcap('tricky with spaces after delimiter.  notice the incosistent sentence case?', '.');
 -- D select initcap('similar with questions too? sigh...', '?')
 -- D select initcap('but works when delimiter is appropriately chosen!  see the difference?', '!  ');
-create or replace macro initcap(s text, delimiter text := ' ') as (list_reduce(list_apply(string_split(s, delimiter), lambda x: upper(substring(x,1,1))||substring(x,2)),lambda acc,x: acc||delimiter||x));
+create or replace temporary macro initcap(s text, delimiter text := ' ') as (list_reduce(list_apply(string_split(s, delimiter), lambda x: upper(substring(x,1,1))||substring(x,2)),lambda acc,x: acc||delimiter||x));
 
 -- Duckdb does not have list_quantile function! https://duckdb.org/docs/current/sql/functions/list#list-aggregates
 -- D with _ as (select random() r from unnest(range(15))) select list(r) as rr,list_quantile(rr,0.85) from _;
 -- D with _ as (select random() r from unnest(range(151))) select list(r) as rr,list_quantile(rr,0.5)=list_median(rr) oughttabetrue from _; -- NOTE (vijay): oughttabetrue will only work for odd length lists.  See the definition of median for even length lists.
 -- D with _ as (select random() r from unnest(range(151))) select list(r) as rr, list_quantile(rr,[0.025,0.975]) as interval95 from _;
-create or replace macro list_quantile(x, q) as (with _ as (select unnest(x) as xx) select quantile(xx, q) from _);
+create or replace temporary macro list_quantile(x, q) as (with _ as (select unnest(x) as xx) select quantile(xx, q) from _);
