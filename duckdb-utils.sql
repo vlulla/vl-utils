@@ -179,3 +179,6 @@ create or replace temporary macro initcap(s text, delimiter text := ' ') as (lis
 -- D with _ as (select random() r from unnest(range(151))) select list(r) as rr,list_quantile(rr,0.5)=list_median(rr) oughttabetrue from _; -- NOTE (vijay): oughttabetrue will only work for odd length lists.  See the definition of median for even length lists.
 -- D with _ as (select random() r from unnest(range(151))) select list(r) as rr, list_quantile(rr,[0.025,0.975]) as interval95 from _;
 create or replace temporary macro list_quantile(x, q) as (with _ as (select unnest(x) as xx) select quantile(xx, q) from _);
+
+-- D from macro_definitions();  -- surprisingly useful!
+create or replace temporary macro macro_definitions() as TABLE(select function_name,macro_definition as sql from duckdb_functions() where not internal order by function_name);
