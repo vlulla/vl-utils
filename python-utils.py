@@ -268,6 +268,9 @@ try:
   type BQParam = bq.ScalarQueryParameter | bq.ArrayQueryParameter | bq.StructQueryParameter | bq.RangeQueryParameter
 
   def gcp_to_polars(qry: str, params:list[BQParam]=[], PROJECT:str='') -> pl.DataFrame:
+    """Example usage:
+    df = gcp_to_polars(qry="select * from `bigquery-public-data.idc_v24.dicom_all` where StudyDate=@dt",params=[bq.ScalarQueryParameter("dt","DATE",datetime.date(2010,1,1))],PROJECT="<your-project>")
+    """
     ## NOTE (vijay): need POLARS_IMPORT_INTERVAL_AS_STRUCT=1 envvar for reading interval as struct.  Still get a warning "Extension type 'google:sqlType:interval' is not registered; loading as its storage type."
     assert PROJECT != '', "Cannot have empty PROJECT"
     if len(params) > 0:
@@ -292,7 +295,7 @@ try:
   type BQParam = bq.ScalarQueryParameter | bq.ArrayQueryParameter | bq.StructQueryParameter | bq.RangeQueryParameter
   def gcp_to_df(qry: str, params:list[BQParam] = [], PROJECT:str = '') -> pd.DataFrame:
     """Example usage:
-    df = gcp_to_df(qry="select * from `bigquery-public-data.idc_v17.dicom_all` where StudyDate=@dt",params=[bq.ScalarQueryParameter("dt","DATE",datetime.date(2010,1,1))],PROJECT="<your-project>")
+    df = gcp_to_df(qry="select * from `bigquery-public-data.idc_v24.dicom_all` where StudyDate=@dt",params=[bq.ScalarQueryParameter("dt","DATE",datetime.date(2010,1,1))],PROJECT="<your-project>")
     """
     ## See:
     ##   https://github.com/googleapis/python-bigquery/blob/main/samples/client_query_w_array_params.py
