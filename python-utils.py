@@ -441,8 +441,8 @@ def grepl[L: list[T] | tuple[T,...]](regex: str, lst: L, invert=False, ignorecas
   >>> grepl("_spend", ('abc', 'xyz_spend', 'abc_spend_xyz'))
   >>> grepl("_spend$", ['abc', 'xyz_spend', 'abc_spend_xyz'])
   >>> grepl("_spend$", [])
-  >>> grepl("abc|xyz", ['abc', 'xyz_spend', 'abc_spend_xyz'])
-  >>> grepl("abc|xyz", ['abc', 'xyz_spend', 'abc_spend_xyz'], invert=True)
+  >>> grepl("(abc|xyz)_", ['abc', 'xyz_spend', 'abc_spend_xyz'])
+  >>> grepl("(abc|xyz)_", ['abc', 'xyz_spend', 'abc_spend_xyz'], invert=True)
   """
   assert isinstance(regex, str)
   assert isiterable(lst)
