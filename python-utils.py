@@ -12,6 +12,7 @@ try: import numpy as np, pandas as pd
 except ModuleNotFoundError as e: print(f"{e=}", file=sys.stderr)
 
 try: from google.cloud import bigquery as bq
+except ImportError as e: print(f"{e=}",file=sys.stderr)
 except ModuleNotFoundError as e: print(f"{e=}",file=sys.stderr)
 
 T = typing.TypeVar("T")
