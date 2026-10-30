@@ -7,11 +7,11 @@
 create or replace temporary macro yearqtr(x) as (select (year(x::date)*10)+quarter(x::date));
 
 -- select * from calendar_between_dates('2024-06-15','2025-02-13'); -- calendar dates between custom dates!!
--- with df as (select dt,yyyy,mm,holiday from (from calendar_year(2026) union all from calendar_year(2027))) select l.*,(r.dt-l.dt) as days_since_blackfriday from df l left join (from df where holiday='BlackFriday') as r using(yyyy);
+-- with df as (select dt,yyyy,mm,dd,doy,woy,holiday from (from calendar_year(2026) union all from calendar_year(2027))) select l.*,(r.dt-l.dt) as days_since_blackfriday from df l left join (from df where holiday='BlackFriday') as r using(yyyy);
 create or replace temporary macro calendar_between_dates(start_date,end_date) as table (
 with
   dates as (select unnest(generate_series(start_date::date,end_date::date,interval 1 day)::date[])::date as dt)
-, dates_with_attrs as (select dt,year(dt) as YYYY, month(dt) as MM, extract(day from dt) as DD, dayofyear(dt) as DOY, dayofmonth(dt) as DOM, weekofyear(dt) as WOY, yearweek(dt) as ISOYYYYWK, extract(weekday from dt) as dow,strftime(dt,'%a') as dow_n, isodow(dt) as ISODOW, dayofweek(dt) as dow_num, quarter(dt) as Q,YYYY||''||Q as YYYYQ from dates)
+, dates_with_attrs as (select dt,year(dt) as YYYY, month(dt) as MM, extract(day from dt) as DD, dayofyear(dt) as DOY, weekofyear(dt) as WOY, yearweek(dt) as ISOYYYYWK, extract(weekday from dt) as dow,strftime(dt,'%a') as dow_n, isodow(dt) as ISODOW, dayofweek(dt) as dow_num, quarter(dt) as Q,YYYY||''||Q as YYYYQ from dates)
 , dates_with_attrs_with_ordinals as (select *,row_number() OVER (yearmonweekday order by dt) as nth_dow from dates_with_attrs window yearmonweekday as (partition by YYYY,MM,dow))
 select * exclude(holiday)
 , case
